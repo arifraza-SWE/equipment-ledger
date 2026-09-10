@@ -3,7 +3,9 @@
 import type { AssetSnapshot } from '@equipment-ledger/shared';
 import { DataTable } from '@/components/DataTable';
 import { EmptyState } from '@/components/EmptyState';
+import { PaginationControls } from '@/components/PaginationControls';
 import type { WorkerNamesById } from '@/features/workers/worker-names';
+import { usePagedList } from '@/hooks/use-paged-list';
 import { useAssetFilters } from '../hooks/use-asset-filters';
 import { AssetLedgerFilters } from './AssetLedgerFilters';
 import { AssetLedgerRow } from './AssetLedgerRow';
@@ -16,6 +18,7 @@ interface AssetLedgerTableProps {
 
 export function AssetLedgerTable({ assets, workerNamesById, mode }: AssetLedgerTableProps) {
   const controls = useAssetFilters(assets);
+  const paged = usePagedList(controls.filteredAssets);
   const showActions = mode === 'live';
 
   return (
@@ -43,7 +46,7 @@ export function AssetLedgerTable({ assets, workerNamesById, mode }: AssetLedgerT
             </tr>
           </thead>
           <tbody>
-            {controls.filteredAssets.map((snapshot) => (
+            {paged.items.map((snapshot) => (
               <AssetLedgerRow
                 key={snapshot.asset.assetId}
                 snapshot={snapshot}
@@ -54,6 +57,15 @@ export function AssetLedgerTable({ assets, workerNamesById, mode }: AssetLedgerT
           </tbody>
         </DataTable>
       )}
+      <PaginationControls
+        page={paged.page}
+        pageCount={paged.pageCount}
+        totalCount={paged.totalCount}
+        rangeStart={paged.rangeStart}
+        rangeEnd={paged.rangeEnd}
+        unit="assets"
+        onPageChange={paged.setPage}
+      />
     </div>
   );
 }

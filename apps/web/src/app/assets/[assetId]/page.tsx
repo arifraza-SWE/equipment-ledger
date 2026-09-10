@@ -12,9 +12,11 @@ import { fetchKeepers } from '@/features/workers/api/keepers-api';
 import { fetchWorkers } from '@/features/workers/api/workers-api';
 import { indexWorkerNames } from '@/features/workers/worker-names';
 import { attemptAll } from '@/lib/api-client';
+import { parsePageParam } from '@/lib/pagination';
 
 interface AssetHistoryPageProps {
   params: Promise<{ assetId: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export async function generateMetadata({ params }: AssetHistoryPageProps): Promise<Metadata> {
@@ -22,8 +24,9 @@ export async function generateMetadata({ params }: AssetHistoryPageProps): Promi
   return { title: assetId };
 }
 
-export default async function AssetHistoryPage({ params }: AssetHistoryPageProps) {
+export default async function AssetHistoryPage({ params, searchParams }: AssetHistoryPageProps) {
   const { assetId } = await params;
+  const { page } = await searchParams;
   const loaded = await attemptAll([
     () => fetchAssetHistory(assetId),
     () => fetchWorkers(),
@@ -80,6 +83,8 @@ export default async function AssetHistoryPage({ params }: AssetHistoryPageProps
           workers={workers}
           workerNamesById={workerNamesById}
           keeperNamesById={keeperNamesById}
+          page={parsePageParam(page)}
+          hrefForPage={(target) => assetHistoryHref(asset.assetId, target)}
         />
       </section>
       <section aria-labelledby="asset-reservations-heading">
@@ -95,4 +100,9 @@ export default async function AssetHistoryPage({ params }: AssetHistoryPageProps
       </section>
     </div>
   );
+}
+
+function assetHistoryHref(assetId: string, page: number): string {
+  const path = `/assets/${encodeURIComponent(assetId)}`;
+  return page > 1 ? `${path}?page=${page}` : path;
 }

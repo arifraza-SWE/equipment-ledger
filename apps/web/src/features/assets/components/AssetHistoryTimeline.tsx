@@ -1,6 +1,8 @@
 import type { Correction, MovementWithNames, Worker } from '@equipment-ledger/shared';
 import { EmptyState } from '@/components/EmptyState';
+import { Pagination } from '@/components/Pagination';
 import type { WorkerNamesById } from '@/features/workers/worker-names';
+import { paginate } from '@/lib/pagination';
 import { AssetTimelineEntry } from './AssetTimelineEntry';
 import { CorrectionsList } from './CorrectionsList';
 import styles from './AssetHistory.module.css';
@@ -11,6 +13,8 @@ interface AssetHistoryTimelineProps {
   workers: Worker[];
   workerNamesById: WorkerNamesById;
   keeperNamesById: Readonly<Record<string, string>>;
+  page: number;
+  hrefForPage: (page: number) => string;
 }
 
 export function AssetHistoryTimeline({
@@ -19,11 +23,15 @@ export function AssetHistoryTimeline({
   workers,
   workerNamesById,
   keeperNamesById,
+  page,
+  hrefForPage,
 }: AssetHistoryTimelineProps) {
   const correctionsById = new Map(
     corrections.map((correction) => [correction.correctionId, correction]),
   );
+  // Paging follows the ordering rather than the arrival order: page two continues the story.
   const ordered = [...movements].sort(compareByEffectiveTime);
+  const paged = paginate(ordered, page);
 
   if (ordered.length === 0) {
     return <EmptyState title="Nothing on the ledger for this asset yet" />;
@@ -31,8 +39,8 @@ export function AssetHistoryTimeline({
 
   return (
     <div className={styles.timelineWrap}>
-      <ol className={styles.timeline}>
-        {ordered.map((entry) => (
+      <ol className={styles.timeline} start={paged.rangeStart}>
+        {paged.items.map((entry) => (
           <AssetTimelineEntry
             key={entry.movement.movementId}
             entry={entry}
@@ -42,6 +50,15 @@ export function AssetHistoryTimeline({
           />
         ))}
       </ol>
+      <Pagination
+        page={paged.page}
+        pageCount={paged.pageCount}
+        totalCount={paged.totalCount}
+        rangeStart={paged.rangeStart}
+        rangeEnd={paged.rangeEnd}
+        unit="entries"
+        hrefForPage={hrefForPage}
+      />
       {corrections.length > 0 && (
         <CorrectionsList
           corrections={corrections}

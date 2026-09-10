@@ -1,0 +1,77 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.summary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.summary .count {
+  font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
+  color: var(--ink-soft);
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.step,
+.page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 9px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page {
+  font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.step:hover,
+.page:hover {
+  background: var(--card-tint);
+  color: var(--ink);
+}
+
+.page[aria-current='page'] {
+  border-color: var(--hairline-strong);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.step[aria-disabled='true'],
+.step:disabled {
+  color: var(--ink-muted);
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.gap {
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}

@@ -4,10 +4,24 @@ import type {
   CorrectMovementRequest,
   IssueAssetRequest,
   MovementResult,
+  PaginatedMovements,
   ReturnAssetRequest,
   ServiceStatusChangeResult,
 } from '@equipment-ledger/shared';
-import { apiMutation, type MutationOutcome } from '@/lib/api-client';
+import { apiMutation, apiRequest, type MutationOutcome } from '@/lib/api-client';
+
+/**
+ * The movements list is the one collection that only ever grows, so it is read a page at a time
+ * against a cursor rather than pulled whole.
+ */
+export function fetchMovements(options: {
+  cursor?: string | undefined;
+  limit: number;
+}): Promise<PaginatedMovements> {
+  return apiRequest<PaginatedMovements>('/ledger/movements', {
+    query: { cursor: options.cursor, limit: options.limit },
+  });
+}
 
 export function issueAsset(
   request: IssueAssetRequest,

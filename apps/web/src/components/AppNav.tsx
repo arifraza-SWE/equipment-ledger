@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/issue', label: 'Issue' },
   { href: '/return', label: 'Return' },
   { href: '/reservations', label: 'Reservations' },
+  { href: '/movements', label: 'Movements' },
   { href: '/as-of', label: 'As of' },
   { href: '/workers', label: 'Workers' },
 ] as const;
