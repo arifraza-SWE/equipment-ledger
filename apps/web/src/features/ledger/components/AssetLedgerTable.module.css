@@ -1,54 +1,144 @@
+/* ---------- filter toolbar ---------- */
+
 .filters {
   display: flex;
   align-items: flex-end;
-  gap: 14px;
-  margin-bottom: 12px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
 }
 
 .filter {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .filter label {
   font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--ink-muted);
 }
 
 .filter select,
 .filter input {
   font: inherit;
-  font-size: 13px;
-  padding: 6px 8px;
-  border: 1px solid var(--hairline-strong);
+  font-size: 13.5px;
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius);
   background: var(--card);
   color: var(--ink);
   min-width: 150px;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.filter select:hover,
+.filter input:hover {
+  border-color: var(--hairline-strong);
+}
+
+.filter select:focus,
+.filter input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
 }
 
 .searchFilter {
   flex: 1;
-  min-width: 200px;
-  max-width: 360px;
+  min-width: 220px;
+  max-width: 400px;
 }
 
-.count {
-  margin: 0 0 7px auto;
-  font-size: 12px;
-  color: var(--ink-muted);
-}
-
-.statusCell {
-  display: inline-flex;
-  gap: 6px;
+.searchWrap {
+  position: relative;
+  display: flex;
   align-items: center;
 }
 
+.searchIcon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.searchWrap input {
+  width: 100%;
+  padding-left: 34px;
+}
+
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  padding-bottom: 7px;
+}
+
+.count {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.count b {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.clear {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clear:hover {
+  background: var(--accent-soft);
+}
+
+/* ---------- table cells ---------- */
+
+.statusCell {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.holder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+}
+
+.holder svg {
+  color: var(--ink-muted);
+  flex: 0 0 auto;
+}
+
+/* A hairline down the left edge, rather than washing the whole row red. */
 .overdueRow th:first-child {
   box-shadow: inset 3px 0 0 var(--status-overdue-fg);
 }
@@ -58,36 +148,120 @@
 }
 
 .overdueFlag {
-  font-size: 11px;
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--status-overdue-fg);
 }
 
-.reservationCell {
-  font-size: 12px;
-}
-
-/* These two columns carry a sentence rather than a value. Letting them wrap keeps the table
-   inside the page instead of pushing the row's identifier off the left edge. */
 .reservationColumn {
   white-space: normal;
-  min-width: 158px;
+  min-width: 190px;
 }
 
 .dueColumn {
   white-space: normal;
-  min-width: 92px;
+  min-width: 104px;
 }
+
+/* ---------- reservation block ---------- */
+
+.reservation {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  font-size: 12.5px;
+}
+
+.reservationIcon {
+  color: var(--ink-muted);
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.reservationBody {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.reservationWhen {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.reservationWho {
+  color: var(--ink-muted);
+}
+
+/* ---------- actions ---------- */
 
 .actionsCell {
-  display: flex;
-  gap: 12px;
+  text-align: right;
 }
 
-@media (max-width: 720px) {
-  .count {
-    margin-left: 0;
+/* Never put display:flex on the td itself - it stops being a table cell and drops out of the
+   column grid. */
+.actions {
+  display: inline-flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 var(--space-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background var(--transition);
+}
+
+.action:hover {
+  text-decoration: none;
+  color: var(--accent-hover);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.actionIconOnly {
+  padding: 0;
+  width: 30px;
+  justify-content: center;
+}
+
+@media (max-width: 700px) {
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .filter select,
+  .filter input,
+  .searchFilter {
+    min-width: 0;
+    max-width: none;
     width: 100%;
+  }
+
+  .trailing {
+    margin-left: 0;
+    padding-bottom: 0;
+    justify-content: space-between;
   }
 }

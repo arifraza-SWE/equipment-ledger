@@ -19,12 +19,15 @@ export interface AssetFilterControls {
   setStatus: (status: AssetStatus | '') => void;
   setKind: (kind: AssetKind | '') => void;
   setSearch: (search: string) => void;
+  clearFilters: () => void;
   filteredAssets: AssetSnapshot[];
   kindsPresent: AssetKind[];
 }
 
+const NO_FILTERS: AssetFilters = { status: '', kind: '', search: '' };
+
 export function useAssetFilters(assets: readonly AssetSnapshot[]): AssetFilterControls {
-  const [filters, setFilters] = useState<AssetFilters>({ status: '', kind: '', search: '' });
+  const [filters, setFilters] = useState<AssetFilters>(NO_FILTERS);
 
   const kindsPresent = useMemo(
     () => [...new Set(assets.map((snapshot) => snapshot.asset.kind))],
@@ -41,6 +44,7 @@ export function useAssetFilters(assets: readonly AssetSnapshot[]): AssetFilterCo
     setStatus: (status) => setFilters((current) => ({ ...current, status })),
     setKind: (kind) => setFilters((current) => ({ ...current, kind })),
     setSearch: (search) => setFilters((current) => ({ ...current, search })),
+    clearFilters: () => setFilters(NO_FILTERS),
     filteredAssets,
     kindsPresent,
   };

@@ -1,6 +1,13 @@
-import { ASSET_KIND_LABELS, type AssetSnapshot, type Reservation } from '@equipment-ledger/shared';
+import { ASSET_KIND_LABELS, type AssetSnapshot } from '@equipment-ledger/shared';
 import Link from 'next/link';
 import { AssetStatusBadge } from '@/components/AssetStatusBadge';
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  CalendarIcon,
+  HistoryIcon,
+  UserIcon,
+} from '@/components/Icon';
 import { Instant } from '@/components/Instant';
 import { StatusBadge } from '@/components/StatusBadge';
 import { classNames } from '@/lib/class-names';
@@ -38,7 +45,11 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
       </td>
       <td>
         {holding ? (
-          <Link href={`/workers/${encodeURIComponent(holding.worker.workerId)}`}>
+          <Link
+            href={`/workers/${encodeURIComponent(holding.worker.workerId)}`}
+            className={styles.holder}
+          >
+            <UserIcon size={14} />
             {holding.worker.fullName}
           </Link>
         ) : (
@@ -55,7 +66,7 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
         {holding?.dueAt ? (
           <>
             <Instant iso={holding.dueAt} compact />
-            {snapshot.overdue && <span className={styles.overdueFlag}> overdue</span>}
+            {snapshot.overdue && <span className={styles.overdueFlag}>overdue</span>}
           </>
         ) : (
           <span className="muted">–</span>
@@ -66,13 +77,36 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
       </td>
       {showActions && (
         <td className={styles.actionsCell}>
-          {issuable && (
-            <Link href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}>Issue</Link>
-          )}
-          {holding && (
-            <Link href={`/return?assetId=${encodeURIComponent(asset.assetId)}`}>Return</Link>
-          )}
-          <Link href={historyHref}>History</Link>
+          <span className={styles.actions}>
+            {issuable && (
+              <Link
+                href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}
+                className={styles.action}
+                title={`Issue ${asset.assetId}`}
+              >
+                <ArrowUpRightIcon size={14} />
+                Issue
+              </Link>
+            )}
+            {holding && (
+              <Link
+                href={`/return?assetId=${encodeURIComponent(asset.assetId)}`}
+                className={styles.action}
+                title={`Return ${asset.assetId}`}
+              >
+                <ArrowDownLeftIcon size={14} />
+                Return
+              </Link>
+            )}
+            <Link
+              href={historyHref}
+              className={classNames(styles.action, styles.actionIconOnly)}
+              title={`History of ${asset.assetId}`}
+              aria-label={`History of ${asset.assetId}`}
+            >
+              <HistoryIcon size={14} />
+            </Link>
+          </span>
         </td>
       )}
     </tr>
@@ -86,13 +120,16 @@ function describeReservation(snapshot: AssetSnapshot, workerNamesById: WorkerNam
   }
   const prefix = snapshot.currentReservation ? 'Now' : 'Next';
   return (
-    <span className={styles.reservationCell}>
-      <span className="muted">{prefix}</span> {reservationWindowText(reservation)}{' '}
-      <span className="muted">for</span> {workerNameOr(workerNamesById, reservation.workerId)}
+    <span className={styles.reservation}>
+      <CalendarIcon size={14} className={styles.reservationIcon} />
+      <span className={styles.reservationBody}>
+        <span className={styles.reservationWhen}>
+          {prefix} {formatWindow(reservation.startsAt, reservation.endsAt)}
+        </span>
+        <span className={styles.reservationWho}>
+          for {workerNameOr(workerNamesById, reservation.workerId)}
+        </span>
+      </span>
     </span>
   );
-}
-
-function reservationWindowText(reservation: Reservation): string {
-  return formatWindow(reservation.startsAt, reservation.endsAt);
 }

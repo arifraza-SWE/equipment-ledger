@@ -1,38 +1,120 @@
-.strip {
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+}
+
+.card {
   display: flex;
-  margin: 0 0 20px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
   background: var(--card);
-  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
-.total {
+.card:hover {
+  border-color: var(--hairline-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.head {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 10px 16px;
-  border-right: 1px solid var(--hairline);
-  white-space: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
-.total:last-child {
-  border-right: 0;
+.label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius);
+  background: var(--card-tint);
+  color: var(--ink-muted);
+  flex: 0 0 auto;
 }
 
 .count {
   margin: 0;
-  font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 28px;
+  font-weight: 650;
   line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
-.label {
-  font-size: 12px;
-  color: var(--ink-muted);
+/* Each card keeps its own accent so the eye can find "overdue" without reading. */
+.card[data-tone='in_store'] .icon {
+  background: var(--status-in-store-bg);
+  color: var(--status-in-store-fg);
 }
 
-.total[data-flagged='true'] .count {
+.card[data-tone='issued'] .icon {
+  background: var(--status-issued-bg);
+  color: var(--status-issued-fg);
+}
+
+.card[data-tone='reserved'] .icon {
+  background: var(--status-reserved-bg);
+  color: var(--status-reserved-fg);
+}
+
+.card[data-tone='out_of_service'] .icon {
+  background: #eceef1;
+  color: var(--ink-soft);
+}
+
+.card[data-tone='overdue'] .icon {
+  background: var(--status-overdue-bg);
   color: var(--status-overdue-fg);
+}
+
+/* Overdue is the only figure that means somebody has to do something today. */
+.card[data-flagged='true'] {
+  border-color: var(--status-overdue-border);
+  background: linear-gradient(var(--status-overdue-bg), var(--card) 62%);
+}
+
+.card[data-flagged='true'] .count,
+.card[data-flagged='true'] .label {
+  color: var(--status-overdue-fg);
+}
+
+@media (max-width: 1080px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .card {
+    padding: var(--space-3);
+  }
+
+  .count {
+    font-size: 23px;
+  }
 }
