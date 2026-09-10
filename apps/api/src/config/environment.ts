@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 export interface ApiEnvironment {
   mongoUri: string;
   port: number;
-  webOrigin: string;
+  webOrigins: string[];
 }
 
 const REPO_ROOT_ENV = resolve(__dirname, '../../../../.env');
@@ -21,8 +21,19 @@ export function loadEnvironment(): ApiEnvironment {
   return {
     mongoUri,
     port,
-    webOrigin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',
+    webOrigins: readOriginList(process.env.WEB_ORIGIN),
   };
+}
+
+function readOriginList(configured: string | undefined): string[] {
+  const origins = (configured ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+  if (origins.length === 0) {
+    throw new Error('WEB_ORIGIN must name at least one origin, e.g. http://localhost:3000');
+  }
+  return origins;
 }
 
 export function requireVariable(name: string): string {

@@ -37,7 +37,11 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
 
   return (
     <div className="stack">
-      <PageHeader eyebrow={worker.trade} title={worker.fullName} lede={<span className="mono">{worker.workerId}</span>} />
+      <PageHeader
+        eyebrow={worker.trade}
+        title={worker.fullName}
+        lede={<span className="mono">{worker.workerId}</span>}
+      />
       <section aria-labelledby="certificates-heading">
         <h2 id="certificates-heading" className="section-label">
           Certificates
@@ -54,7 +58,10 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
         <h2 id="recent-heading" className="section-label">
           Recent movements
         </h2>
-        <MovementsTable movements={recentMovements} caption={`Recent movements for ${worker.fullName}`} />
+        <MovementsTable
+          movements={recentMovements}
+          caption={`Recent movements for ${worker.fullName}`}
+        />
       </section>
       <section aria-labelledby="worker-reservations-heading">
         <h2 id="worker-reservations-heading" className="section-label">

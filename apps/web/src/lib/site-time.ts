@@ -98,10 +98,15 @@ const wallClockFormat = new Intl.DateTimeFormat('en-GB', {
   second: '2-digit',
 });
 
-const zoneFormat = new Intl.DateTimeFormat('en-GB', { timeZone: siteTimeZone, timeZoneName: 'short' });
+const zoneFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: siteTimeZone,
+  timeZoneName: 'short',
+});
 
 function toSiteWallClock(instant: Date): SiteWallClock {
-  const parts = new Map(wallClockFormat.formatToParts(instant).map((part) => [part.type, part.value]));
+  const parts = new Map(
+    wallClockFormat.formatToParts(instant).map((part) => [part.type, part.value]),
+  );
   return {
     year: Number(parts.get('year')),
     month: Number(parts.get('month')),

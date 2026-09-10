@@ -36,10 +36,11 @@ export function correctMovement(
   request: CorrectMovementRequest,
   idempotencyKey: string,
 ): Promise<MutationOutcome<CorrectionResult>> {
-  return apiMutation<CorrectionResult>(
-    `/movements/${encodeURIComponent(movementId)}/corrections`,
-    { method: 'POST', body: request, idempotencyKey },
-  );
+  return apiMutation<CorrectionResult>(`/movements/${encodeURIComponent(movementId)}/corrections`, {
+    method: 'POST',
+    body: request,
+    idempotencyKey,
+  });
 }
 
 export function changeServiceStatus(

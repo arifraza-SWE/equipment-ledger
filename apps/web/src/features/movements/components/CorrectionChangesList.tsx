@@ -22,9 +22,13 @@ export function CorrectionChangesList({ changes, workerNamesById }: CorrectionCh
       {changes.map((change) => (
         <li key={change.field}>
           <span className={styles.field}>{FIELD_LABELS[change.field]}</span>{' '}
-          <span className={styles.from}>{describeValue(change.field, change.from, workerNamesById)}</span>
+          <span className={styles.from}>
+            {describeValue(change.field, change.from, workerNamesById)}
+          </span>
           <span className="muted"> → </span>
-          <span className={styles.to}>{describeValue(change.field, change.to, workerNamesById)}</span>
+          <span className={styles.to}>
+            {describeValue(change.field, change.to, workerNamesById)}
+          </span>
         </li>
       ))}
     </ul>

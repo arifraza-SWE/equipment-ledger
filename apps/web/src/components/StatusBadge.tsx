@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { classNames } from '@/lib/class-names';
 import styles from './StatusBadge.module.css';
 
-export type BadgeTone = 'in_store' | 'reserved' | 'issued' | 'overdue' | 'out_of_service' | 'neutral';
+export type BadgeTone =
+  'in_store' | 'reserved' | 'issued' | 'overdue' | 'out_of_service' | 'neutral';
 
 const TONE_CLASS = {
   in_store: styles.inStore,

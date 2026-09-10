@@ -40,8 +40,7 @@ export interface MutationOutcome<TResult> {
 }
 
 export type RequestOutcome<TValue> =
-  | { ok: true; value: TValue }
-  | { ok: false; message: string; notFound: boolean };
+  { ok: true; value: TValue } | { ok: false; message: string; notFound: boolean };
 
 export async function apiRequest<TResult>(
   path: string,

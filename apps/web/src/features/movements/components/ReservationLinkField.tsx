@@ -13,8 +13,8 @@ export function ReservationLinkField({ reservations, value, onChange }: Reservat
   if (reservations.length === 0) {
     return (
       <p className={formStyles.hint}>
-        No reservation by this worker for this asset. If one covers the issue time the store
-        links it on its own.
+        No reservation by this worker for this asset. If one covers the issue time the store links
+        it on its own.
       </p>
     );
   }

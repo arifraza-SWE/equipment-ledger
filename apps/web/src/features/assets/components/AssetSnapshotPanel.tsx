@@ -49,7 +49,9 @@ export function AssetSnapshotPanel({ snapshot, workerNamesById }: AssetSnapshotP
         </div>
         <div>
           <dt>Out since</dt>
-          <dd>{holding ? <Instant iso={holding.effectiveAt} /> : <span className="muted">–</span>}</dd>
+          <dd>
+            {holding ? <Instant iso={holding.effectiveAt} /> : <span className="muted">–</span>}
+          </dd>
         </div>
         <div>
           <dt>Due back</dt>

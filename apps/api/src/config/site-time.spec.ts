@@ -36,6 +36,8 @@ describe('the site clock', () => {
 
   it('ends the day on the site clock, so a certificate lapses at the site midnight', () => {
     process.env.SITE_TIMEZONE = 'Europe/London';
-    expect(endOfSiteDay(new Date('2026-07-15T09:00:00Z')).toISOString()).toBe('2026-07-15T22:59:59.000Z');
+    expect(endOfSiteDay(new Date('2026-07-15T09:00:00Z')).toISOString()).toBe(
+      '2026-07-15T22:59:59.000Z',
+    );
   });
 });

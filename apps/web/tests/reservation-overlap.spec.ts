@@ -10,8 +10,12 @@ test('a reservation overlapping the seeded TWR-001 window is refused with the ov
 
   await page.getByLabel('Asset', { exact: true }).selectOption('TWR-001');
   await page.getByLabel('Worker', { exact: true }).selectOption('WKR-001');
-  await page.getByLabel('Starts', { exact: true }).fill(toSiteWallClock(new Date(`${day}T09:00:00Z`)));
-  await page.getByLabel('Ends', { exact: true }).fill(toSiteWallClock(new Date(`${day}T11:00:00Z`)));
+  await page
+    .getByLabel('Starts', { exact: true })
+    .fill(toSiteWallClock(new Date(`${day}T09:00:00Z`)));
+  await page
+    .getByLabel('Ends', { exact: true })
+    .fill(toSiteWallClock(new Date(`${day}T11:00:00Z`)));
 
   await page.getByRole('button', { name: 'Reserve' }).click();
 

@@ -38,7 +38,10 @@ interface ReturnAssetFormProps {
 
 export function ReturnAssetForm({ assets, workers, initialAssetId }: ReturnAssetFormProps) {
   const { selectedKeeper } = useSelectedKeeper();
-  const heldAssets = useMemo(() => assets.filter((snapshot) => snapshot.holding !== null), [assets]);
+  const heldAssets = useMemo(
+    () => assets.filter((snapshot) => snapshot.holding !== null),
+    [assets],
+  );
   const workerNamesById = useMemo(() => indexWorkerNames(workers), [workers]);
   const requestedButNotHeld = assets.find(
     (snapshot) => snapshot.asset.assetId === initialAssetId && snapshot.holding === null,
@@ -67,8 +70,10 @@ export function ReturnAssetForm({ assets, workers, initialAssetId }: ReturnAsset
   const differentReturner = holder !== null && values.returnedByWorkerId !== holder.workerId;
   const effectiveAtIso = isoFromSiteWallClock(values.effectiveAt);
 
-  const update = <TKey extends keyof ReturnFormValues>(key: TKey, nextValue: ReturnFormValues[TKey]) =>
-    setValues((current) => ({ ...current, [key]: nextValue }));
+  const update = <TKey extends keyof ReturnFormValues>(
+    key: TKey,
+    nextValue: ReturnFormValues[TKey],
+  ) => setValues((current) => ({ ...current, [key]: nextValue }));
 
   const chooseAsset = (assetId: string) => {
     const snapshot = heldAssets.find((candidate) => candidate.asset.assetId === assetId);
@@ -105,8 +110,7 @@ export function ReturnAssetForm({ assets, workers, initialAssetId }: ReturnAsset
     <form className={formStyles.form} onSubmit={handleSubmit} noValidate>
       {requestedButNotHeld && (
         <Notice tone="info">
-          {requestedButNotHeld.asset.assetId} is not out with anyone, so there is nothing to
-          return.
+          {requestedButNotHeld.asset.assetId} is not out with anyone, so there is nothing to return.
         </Notice>
       )}
       <AssetField
@@ -126,7 +130,9 @@ export function ReturnAssetForm({ assets, workers, initialAssetId }: ReturnAsset
         requiredCertification={null}
         atIso={effectiveAtIso}
         error={fieldErrors.returnedByWorkerId}
-        hint={holder ? `Held by ${holder.fullName}.` : 'Defaults to the holder once an asset is chosen.'}
+        hint={
+          holder ? `Held by ${holder.fullName}.` : 'Defaults to the holder once an asset is chosen.'
+        }
       />
       <DatetimeField
         label="Came back at"

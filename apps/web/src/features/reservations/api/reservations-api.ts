@@ -19,7 +19,11 @@ export function createReservation(
   request: CreateReservationRequest,
   idempotencyKey: string,
 ): Promise<MutationOutcome<Reservation>> {
-  return apiMutation<Reservation>('/reservations', { method: 'POST', body: request, idempotencyKey });
+  return apiMutation<Reservation>('/reservations', {
+    method: 'POST',
+    body: request,
+    idempotencyKey,
+  });
 }
 
 export function cancelReservation(

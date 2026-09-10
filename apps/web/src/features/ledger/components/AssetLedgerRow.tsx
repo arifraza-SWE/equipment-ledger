@@ -60,8 +60,12 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
       <td>{describeReservation(snapshot, workerNamesById)}</td>
       {showActions && (
         <td className={styles.actionsCell}>
-          {issuable && <Link href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}>Issue</Link>}
-          {holding && <Link href={`/return?assetId=${encodeURIComponent(asset.assetId)}`}>Return</Link>}
+          {issuable && (
+            <Link href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}>Issue</Link>
+          )}
+          {holding && (
+            <Link href={`/return?assetId=${encodeURIComponent(asset.assetId)}`}>Return</Link>
+          )}
           <Link href={historyHref}>History</Link>
         </td>
       )}

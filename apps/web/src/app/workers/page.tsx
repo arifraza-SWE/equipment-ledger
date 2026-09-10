@@ -12,8 +12,15 @@ export default async function WorkersPage() {
 
   return (
     <>
-      <PageHeader title="Workers" lede="Everyone who can draw equipment, with their certificates." />
-      {workers.ok ? <WorkersTable workers={workers.value} /> : <LoadFailure message={workers.message} />}
+      <PageHeader
+        title="Workers"
+        lede="Everyone who can draw equipment, with their certificates."
+      />
+      {workers.ok ? (
+        <WorkersTable workers={workers.value} />
+      ) : (
+        <LoadFailure message={workers.message} />
+      )}
     </>
   );
 }

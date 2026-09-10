@@ -39,12 +39,10 @@ export async function countIssuesAt(
   assetId: string,
   effectiveAt: string,
 ): Promise<number> {
-  return connection
-    .collection('movements')
-    .countDocuments({
-      assetId,
-      type: 'issue',
-      effectiveAt: new Date(effectiveAt),
-      supersededByCorrectionId: null,
-    });
+  return connection.collection('movements').countDocuments({
+    assetId,
+    type: 'issue',
+    effectiveAt: new Date(effectiveAt),
+    supersededByCorrectionId: null,
+  });
 }

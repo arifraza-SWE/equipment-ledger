@@ -37,13 +37,23 @@ export function HoldingsTable({ holdings }: { holdings: AssetSnapshot[] }) {
               <AssetStatusBadge status={snapshot.status} />
             </td>
             <td>
-              {snapshot.holding ? <Instant iso={snapshot.holding.effectiveAt} /> : <span className="muted">–</span>}
+              {snapshot.holding ? (
+                <Instant iso={snapshot.holding.effectiveAt} />
+              ) : (
+                <span className="muted">–</span>
+              )}
             </td>
             <td>
-              {snapshot.holding?.dueAt ? <Instant iso={snapshot.holding.dueAt} /> : <span className="muted">–</span>}
+              {snapshot.holding?.dueAt ? (
+                <Instant iso={snapshot.holding.dueAt} />
+              ) : (
+                <span className="muted">–</span>
+              )}
             </td>
             <td>
-              <Link href={`/return?assetId=${encodeURIComponent(snapshot.asset.assetId)}`}>Return</Link>
+              <Link href={`/return?assetId=${encodeURIComponent(snapshot.asset.assetId)}`}>
+                Return
+              </Link>
             </td>
           </tr>
         ))}

@@ -95,7 +95,12 @@ export function CorrectMovementForm({ movement, workers, onClose }: CorrectMovem
             hint="Kept with the correction, alongside who made it and when."
           />
           {values.kind === 'amend' && (
-            <AmendmentFields original={movement} workers={workers} values={values} onChange={update} />
+            <AmendmentFields
+              original={movement}
+              workers={workers}
+              values={values}
+              onChange={update}
+            />
           )}
         </>
       )}

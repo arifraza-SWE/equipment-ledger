@@ -71,7 +71,10 @@ export function IssueAssetForm({
       : '',
   }));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const submission = useLedgerSubmission<IssueAssetRequest, MovementResult>('issue-asset', issueAsset);
+  const submission = useLedgerSubmission<IssueAssetRequest, MovementResult>(
+    'issue-asset',
+    issueAsset,
+  );
 
   useEffect(() => {
     setValues((current) => ({ ...current, effectiveAt: siteWallClockNow() }));
@@ -84,8 +87,10 @@ export function IssueAssetForm({
       reservation.assetId === values.assetId && reservation.workerId === values.workerId,
   );
 
-  const update = <TKey extends keyof IssueFormValues>(key: TKey, nextValue: IssueFormValues[TKey]) =>
-    setValues((current) => ({ ...current, [key]: nextValue }));
+  const update = <TKey extends keyof IssueFormValues>(
+    key: TKey,
+    nextValue: IssueFormValues[TKey],
+  ) => setValues((current) => ({ ...current, [key]: nextValue }));
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

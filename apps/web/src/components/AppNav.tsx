@@ -19,8 +19,7 @@ export function AppNav() {
   return (
     <nav aria-label="Main" className={styles.nav}>
       {NAV_ITEMS.map((navItem) => {
-        const active =
-          navItem.href === '/' ? pathname === '/' : pathname.startsWith(navItem.href);
+        const active = navItem.href === '/' ? pathname === '/' : pathname.startsWith(navItem.href);
         return (
           <Link
             key={navItem.href}

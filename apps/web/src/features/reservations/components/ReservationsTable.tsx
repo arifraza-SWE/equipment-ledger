@@ -48,13 +48,18 @@ export function ReservationsTable({
             <tr key={reservation.reservationId}>
               {showAsset && (
                 <td>
-                  <Link href={`/assets/${encodeURIComponent(reservation.assetId)}`} className="mono">
+                  <Link
+                    href={`/assets/${encodeURIComponent(reservation.assetId)}`}
+                    className="mono"
+                  >
                     {reservation.assetId}
                   </Link>
                 </td>
               )}
               <td>
-                <Link href={`/workers/${encodeURIComponent(reservation.workerId)}`}>{workerName}</Link>
+                <Link href={`/workers/${encodeURIComponent(reservation.workerId)}`}>
+                  {workerName}
+                </Link>
               </td>
               <td>
                 <Instant iso={reservation.startsAt} />
@@ -66,7 +71,9 @@ export function ReservationsTable({
                 <span className={styles.statusCell}>
                   <ReservationStatusBadge status={reservation.status} />
                   {reservation.standing && (
-                    <span className="muted">{RESERVATION_STANDING_LABELS[reservation.standing]}</span>
+                    <span className="muted">
+                      {RESERVATION_STANDING_LABELS[reservation.standing]}
+                    </span>
                   )}
                 </span>
               </td>

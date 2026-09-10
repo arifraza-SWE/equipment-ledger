@@ -60,7 +60,9 @@ export default async function AssetHistoryPage({ params }: AssetHistoryPageProps
         }
         actions={
           <>
-            {issuable && <Link href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}>Issue</Link>}
+            {issuable && (
+              <Link href={`/issue?assetId=${encodeURIComponent(asset.assetId)}`}>Issue</Link>
+            )}
             {snapshot.holding && (
               <Link href={`/return?assetId=${encodeURIComponent(asset.assetId)}`}>Return</Link>
             )}

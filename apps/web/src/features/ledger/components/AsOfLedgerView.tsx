@@ -42,8 +42,7 @@ function SnapshotAtInstant({
   snapshot: StoreSnapshot;
   workerNamesById: WorkerNamesById;
 }) {
-  const beforeOpening =
-    snapshot.storeOpenedAt !== null && snapshot.asOf < snapshot.storeOpenedAt;
+  const beforeOpening = snapshot.storeOpenedAt !== null && snapshot.asOf < snapshot.storeOpenedAt;
 
   return (
     <>

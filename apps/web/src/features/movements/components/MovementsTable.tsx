@@ -32,7 +32,10 @@ export function MovementsTable({ movements, caption }: MovementsTableProps) {
       </thead>
       <tbody>
         {movements.map(({ movement, worker, returnedBy, keeper }) => (
-          <tr key={movement.movementId} data-superseded={movement.supersededByCorrectionId !== null}>
+          <tr
+            key={movement.movementId}
+            data-superseded={movement.supersededByCorrectionId !== null}
+          >
             <td>
               <MovementTypeBadge type={movement.type} />
               {movement.supersededByCorrectionId && <span className="muted"> corrected</span>}

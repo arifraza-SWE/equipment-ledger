@@ -10,7 +10,7 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule.register({ mongoUri: environment.mongoUri }), {
     logger: ['log', 'warn', 'error'],
   });
-  app.enableCors({ origin: environment.webOrigin, exposedHeaders: [IDEMPOTENCY_REPLAYED_HEADER] });
+  app.enableCors({ origin: environment.webOrigins, exposedHeaders: [IDEMPOTENCY_REPLAYED_HEADER] });
   app.enableShutdownHooks();
   await app.listen(environment.port);
   Logger.log(`Equipment ledger API listening on http://localhost:${environment.port}`, 'Bootstrap');

@@ -132,7 +132,10 @@ export function ReservationForm({ assets, workers }: ReservationFormProps) {
             <p>
               <ReservationWindow reservation={reservation} />
               {reservation.standing && (
-                <span className="muted"> · {RESERVATION_STANDING_LABELS[reservation.standing]}</span>
+                <span className="muted">
+                  {' '}
+                  · {RESERVATION_STANDING_LABELS[reservation.standing]}
+                </span>
               )}
             </p>
             {replayed && <p>This reservation was made on an earlier attempt; it exists once.</p>}
