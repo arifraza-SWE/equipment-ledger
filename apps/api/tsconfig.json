@@ -9,7 +9,6 @@
     "removeComments": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "strictPropertyInitialization": false,
     "types": ["node", "jest"]
