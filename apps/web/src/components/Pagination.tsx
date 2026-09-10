@@ -12,10 +12,7 @@ interface PaginationProps {
   hrefForPage: (page: number) => string;
 }
 
-/**
- * Paging for lists the server renders. Pages are links, so a page is bookmarkable and the browser's
- * back button walks the pages the way a reader expects.
- */
+/** Paging for server-rendered lists. Pages are links, so each one is bookmarkable. */
 export function Pagination({
   page,
   pageCount,

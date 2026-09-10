@@ -155,10 +155,9 @@ textarea.control {
   margin: 0;
 }
 
-/* Lays a short form out across the page instead of down it, so a create panel above a wide
-   table costs two rows rather than eight. Counted from the start: the trailing feedback block
-   renders nothing until a submission happens, so counting from the end shifts every rule the
-   moment somebody presses the button. */
+/* Lays a short form across the page rather than down it. Counted from the start: the trailing
+   feedback block renders nothing until a submission happens, so counting from the end would
+   shift every rule once it appears. */
 .formInline {
   max-width: none;
   display: grid;

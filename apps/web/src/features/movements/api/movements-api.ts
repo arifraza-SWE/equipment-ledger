@@ -10,10 +10,7 @@ import type {
 } from '@equipment-ledger/shared';
 import { apiMutation, apiRequest, type MutationOutcome } from '@/lib/api-client';
 
-/**
- * The movements list is the one collection that only ever grows, so it is read a page at a time
- * against a cursor rather than pulled whole.
- */
+/** Movements only grow, so the list is read a page at a time against a cursor. */
 export function fetchMovements(options: {
   cursor?: string | undefined;
   limit: number;

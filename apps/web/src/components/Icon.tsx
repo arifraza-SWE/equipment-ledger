@@ -1,9 +1,6 @@
 import type { ReactNode, SVGProps } from 'react';
 
-/**
- * The project carries no icon library and does not need one: a dozen line icons drawn inline cost
- * nothing to ship and stay consistent with each other. All are on a 24-unit grid so they line up.
- */
+/** Line icons drawn inline rather than pulling in a library. All on a 24-unit grid. */
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   size?: number;
 }

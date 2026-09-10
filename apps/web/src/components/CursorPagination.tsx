@@ -9,9 +9,9 @@ interface CursorPaginationProps {
 }
 
 /**
- * Paging for an append-only log. A cursor names a position, not an offset, so there is no page
- * count to show and no way to jump to page seven — only the step either side of where you are.
- * The trade is that a page cannot skip or repeat an entry while movements are being written.
+ * Paging for an append-only log. A cursor names a position rather than an offset, so there is no
+ * page count and no jumping to an arbitrary page, but a page cannot skip or repeat an entry while
+ * movements are being written.
  */
 export function CursorPagination({
   shownCount,

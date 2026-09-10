@@ -12,8 +12,7 @@
   border: 1px solid transparent;
 }
 
-/* A coloured dot carries the state as well as the fill, so it survives a greyscale print
-   and does not lean on colour alone. */
+/* Dot as well as fill, so the badge does not rely on colour alone. */
 .dot {
   width: 6px;
   height: 6px;

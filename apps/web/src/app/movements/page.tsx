@@ -34,7 +34,7 @@ export default async function MovementsPage({
     <>
       <PageHeader
         title="Movements"
-        lede="Every entry on the ledger, newest first — issues, returns and service changes across the whole store."
+        lede="Every entry on the ledger, newest first: issues, returns and service changes across the whole store."
       />
       <MovementsTable movements={movements} caption="Movements across the store" />
       <CursorPagination

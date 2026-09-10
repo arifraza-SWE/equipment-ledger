@@ -15,7 +15,7 @@ interface PaginationControlsProps {
 
 /**
  * Paging for lists the browser already holds and filters. Nothing is fetched when the page turns,
- * so these are buttons rather than links — there is no new address to go to.
+ * so these are buttons rather than links: there is no new address to go to.
  */
 export function PaginationControls({
   page,

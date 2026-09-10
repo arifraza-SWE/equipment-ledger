@@ -153,7 +153,7 @@
   flex: 0 0 auto;
 }
 
-/* A real native select, restyled — never a div pretending to be one. */
+/* Restyled native select, not a div standing in for one. */
 .keeperSelect {
   font: inherit;
   font-size: 13px;
@@ -248,7 +248,7 @@
     order: 2;
   }
 
-  /* Out of the flow until opened, so the header stays one row on a phone. */
+  /* Out of the flow until opened, so the header stays one row. */
   .nav {
     order: 4;
     flex: 1 0 100%;
@@ -292,7 +292,7 @@
     display: none;
   }
 
-  /* Let the brand give way rather than push the keeper onto a second row. */
+  /* Brand shrinks first so the header stays on one row. */
   .brand {
     flex: 0 1 auto;
     min-width: 0;

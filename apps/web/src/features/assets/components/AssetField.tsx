@@ -14,9 +14,8 @@ interface AssetFieldProps {
   onChange: (assetId: string) => void;
   describeOption?: (snapshot: AssetSnapshot) => string;
   /**
-   * Why this asset cannot be chosen, or null if it can. Assets that cannot be chosen stay in the
-   * list, greyed out and carrying the reason: a keeper hunting for one needs to find out that it
-   * is out of service, not that it has vanished.
+   * Why this asset cannot be chosen, or null if it can. Unavailable assets stay in the list,
+   * disabled and carrying the reason, so a keeper can see what happened to one they are after.
    */
   unavailableReason?: (snapshot: AssetSnapshot) => string | null;
   hint?: React.ReactNode;

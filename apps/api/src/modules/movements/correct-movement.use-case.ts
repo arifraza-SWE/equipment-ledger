@@ -255,7 +255,7 @@ export class CorrectMovementUseCase {
    * movement the link must move to the replacement, and when the correction hands the asset to
    * a different worker the reservation was never collected at all, so it goes back to standing.
    *
-   * Note that a correction is not held to the reservation rule the issue path enforces. That
+   * A correction is not held to the reservation rule the issue path enforces. That
    * rule governs what the keeper may hand over at the hatch; a correction only records what
    * already happened, and a ledger that refuses to record the truth is worse than one that
    * shows a promise was not kept.

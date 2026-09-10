@@ -74,17 +74,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The wrapper sets overflow-x, which makes it a scroll container on both axes, so the header
-   sticks to the wrapper rather than the viewport. Any offset here would push it down over the
-   first row instead. */
+/* overflow-x on the wrapper makes it a scroll container on both axes, so the header sticks to
+   the wrapper, not the viewport. An offset here would push it over the first row. */
 .sticky thead th {
   position: sticky;
   top: 0;
   z-index: 3;
 }
 
-/* A wide table still scrolls sideways on a narrow window; the row header stays put so a row
-   never loses the identifier that names it. */
+/* Row header stays put while a wide table scrolls sideways. */
 .pinFirst thead th:first-child,
 .pinFirst tbody th:first-child {
   position: sticky;

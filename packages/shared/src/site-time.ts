@@ -40,7 +40,7 @@ export function formatDayOn(instant: Date, timeZone: string): string {
   return describeDay(toWallClock(instant, timeZone), true);
 }
 
-/** "07:45 BST on Thu 10 Sep 2026" — how a time is spoken in an error message. */
+/** "07:45 BST on Thu 10 Sep 2026", the form used in error messages. */
 export function describeInstantOn(instant: Date, timeZone: string): string {
   const wallClock = toWallClock(instant, timeZone);
   return `${describeClock(wallClock)} ${zoneAbbreviation(instant, timeZone)} on ${describeDay(wallClock, true)}`;

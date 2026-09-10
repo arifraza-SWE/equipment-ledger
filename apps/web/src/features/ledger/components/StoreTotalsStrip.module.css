@@ -61,7 +61,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Each card keeps its own accent so the eye can find "overdue" without reading. */
+/* Per-status accent on the icon. */
 .card[data-tone='in_store'] .icon {
   background: var(--status-in-store-bg);
   color: var(--status-in-store-fg);
@@ -87,7 +87,7 @@
   color: var(--status-overdue-fg);
 }
 
-/* Overdue is the only figure that means somebody has to do something today. */
+/* Overdue is flagged because it is the figure that needs acting on. */
 .card[data-flagged='true'] {
   border-color: var(--status-overdue-border);
   background: linear-gradient(var(--status-overdue-bg), var(--card) 62%);

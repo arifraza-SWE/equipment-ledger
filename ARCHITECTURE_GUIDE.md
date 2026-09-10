@@ -177,20 +177,20 @@ mechanism as one-holder, not a separate one.
 
 ## 7. Concurrency: where to look
 
-- `apps/api/src/modules/assets/assets.repository.ts` — `claimLedgerWrite`, the conditional
+- `apps/api/src/modules/assets/assets.repository.ts`: `claimLedgerWrite`, the conditional
   `$inc` on the asset document.
-- `apps/api/src/database/transaction-runner.ts` — snapshot transactions, conflict detection,
+- `apps/api/src/database/transaction-runner.ts`: snapshot transactions, conflict detection,
   retry with backoff.
 - Every use case calls `claimLedgerWrite` before it inserts. If you add a command that writes to
   a ledger, it must too, or it opts out of the guarantee.
-- `apps/api/test/e2e/concurrency.e2e-spec.ts` — 25 simultaneous issues, one succeeds.
-- `apps/api/test/invariants/one-holder.invariant-spec.ts` — the same across six assets, then a
+- `apps/api/test/e2e/concurrency.e2e-spec.ts`: 25 simultaneous issues, one succeeds.
+- `apps/api/test/invariants/one-holder.invariant-spec.ts`: the same across six assets, then a
   check that every ledger still alternates.
-- `scripts/concurrent-issue.sh` — the same thing by hand against a running API.
+- `scripts/concurrent-issue.sh`: the same thing by hand against a running API.
 
 ## 8. Idempotency: where to look
 
-- Server: `apps/api/src/common/idempotency/` — the interceptor claims, the service owns the
+- Server: `apps/api/src/common/idempotency/`: the interceptor claims, the service owns the
   record, `request-fingerprint.ts` decides what "the same request" means.
 - Client: `apps/web/src/lib/idempotency-key.ts` stores one key per form in `sessionStorage`;
   `use-idempotency-key.ts` reads it; `use-ledger-submission.ts` sends it and rotates it only
@@ -202,15 +202,15 @@ mechanism as one-holder, not a separate one.
 
 ## 9. Historical reconstruction: where to look
 
-- `apps/api/src/modules/ledger/store-snapshot.service.ts` — `storeAt(instant)`.
-- `apps/api/src/modules/ledger/persistence/movements.repository.ts` —
+- `apps/api/src/modules/ledger/store-snapshot.service.ts`: `storeAt(instant)`.
+- `apps/api/src/modules/ledger/persistence/movements.repository.ts`:
   `findLatestEffectivePerAsset`, the aggregation that takes the latest effective entry per asset
   per track.
-- `apps/api/src/modules/ledger/domain/asset-snapshot.ts` — turns a holding, a service status and
+- `apps/api/src/modules/ledger/domain/asset-snapshot.ts`: turns a holding, a service status and
   the standing reservations into a snapshot. Shared by the whole-store and single-asset paths, so
   they cannot drift.
-- `apps/api/src/modules/ledger/domain/asset-timeline.ts` — `stateAt`, the single-asset replay.
-- `apps/api/test/invariants/reconstruction.invariant-spec.ts` — a second, naive implementation
+- `apps/api/src/modules/ledger/domain/asset-timeline.ts`: `stateAt`, the single-asset replay.
+- `apps/api/test/invariants/reconstruction.invariant-spec.ts`: a second, naive implementation
   over raw documents, compared with the API at hundreds of instants.
 
 Boundaries: a movement takes effect at its own instant, inclusive. Everything uses `<=`.

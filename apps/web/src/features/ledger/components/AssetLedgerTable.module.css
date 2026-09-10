@@ -138,7 +138,7 @@
   flex: 0 0 auto;
 }
 
-/* A hairline down the left edge, rather than washing the whole row red. */
+/* Left edge marker instead of tinting the whole row. */
 .overdueRow th:first-child {
   box-shadow: inset 3px 0 0 var(--status-overdue-fg);
 }
@@ -203,8 +203,7 @@
   text-align: right;
 }
 
-/* Never put display:flex on the td itself - it stops being a table cell and drops out of the
-   column grid. */
+/* display:flex on the td stops it being a table cell, so the flex row goes inside it. */
 .actions {
   display: inline-flex;
   gap: var(--space-1);
