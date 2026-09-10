@@ -18,7 +18,7 @@ import formStyles from '@/components/Form.module.css';
 import { VoidedReservationsList } from '@/features/reservations/components/VoidedReservationsList';
 import type { WorkerNamesById } from '@/features/workers/worker-names';
 import { useLedgerSubmission } from '@/hooks/use-ledger-submission';
-import { isoFromSiteWallClock } from '@/lib/site-time';
+import { isoFromSiteWallClock, siteWallClockNow } from '@/lib/site-time';
 import { changeServiceStatus } from '../api/movements-api';
 
 interface ServiceStatusFormProps {
@@ -38,7 +38,7 @@ export function ServiceStatusForm({
   const targetStatus: ServiceStatus =
     serviceStatus === 'in_service' ? 'out_of_service' : 'in_service';
   const [reason, setReason] = useState('');
-  const [effectiveAt, setEffectiveAt] = useState('');
+  const [effectiveAt, setEffectiveAt] = useState(() => siteWallClockNow());
   const [reasonError, setReasonError] = useState<string | null>(null);
   const submission = useLedgerSubmission<ChangeServiceStatusRequest, ServiceStatusChangeResult>(
     `service-status-${assetId}`,
@@ -56,15 +56,18 @@ export function ServiceStatusForm({
       return;
     }
     const effectiveAtIso = isoFromSiteWallClock(effectiveAt);
+    if (effectiveAtIso === null) {
+      return;
+    }
     const succeeded = await submission.submit({
       status: targetStatus,
       keeperId: selectedKeeper.keeperId,
       reason: reason.trim(),
-      ...(effectiveAtIso ? { effectiveAt: effectiveAtIso } : {}),
+      effectiveAt: effectiveAtIso,
     });
     if (succeeded) {
       setReason('');
-      setEffectiveAt('');
+      setEffectiveAt(siteWallClockNow());
     }
   };
 
@@ -84,10 +87,9 @@ export function ServiceStatusForm({
       />
       <DatetimeField
         label="Effective at"
-        optional
         value={effectiveAt}
         onChange={setEffectiveAt}
-        hint="Leave blank for now. Backdate if it happened earlier."
+        hint="Backdate if it happened earlier; the time it was written down is recorded automatically."
       />
       <SubmitBar
         label={targetStatus === 'out_of_service' ? 'Take out of service' : 'Return to service'}

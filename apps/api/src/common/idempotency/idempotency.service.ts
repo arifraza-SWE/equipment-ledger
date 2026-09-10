@@ -4,7 +4,13 @@ import { Model } from 'mongoose';
 import { RuleViolationError, StateConflictError } from '../errors/domain-error';
 import { IdempotencyRecord, type StoredResponse } from './idempotency-record.schema';
 
-const STALE_CLAIM_AFTER_MS = 30_000;
+/**
+ * Long enough that a claim is only ever taken over once the original request cannot still be
+ * running: MongoDB kills a transaction at 60 seconds, so anything older than this is dead.
+ * A takeover re-runs the command, which the ledger's own invariants then refuse if the first
+ * attempt had already committed.
+ */
+export const STALE_CLAIM_AFTER_MS = 120_000;
 const DUPLICATE_KEY_ERROR = 11000;
 
 export type ClaimOutcome = { kind: 'owned' } | { kind: 'replay'; response: StoredResponse };

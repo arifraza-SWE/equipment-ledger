@@ -3,7 +3,7 @@ import {
   SERVICE_STATUSES,
   type ServiceStatus,
 } from '@equipment-ledger/shared';
-import { IsIn, IsOptional, IsString, Length } from 'class-validator';
+import { IsIn, IsString, Length } from 'class-validator';
 import { IsIdentifier } from '../../../common/validation/identifier';
 import { IsInstant } from '../../../common/validation/is-instant.decorator';
 
@@ -18,7 +18,6 @@ export class ChangeServiceStatusDto implements ChangeServiceStatusRequest {
   @Length(3, 500, { message: 'reason must say why in 3 to 500 characters' })
   reason: string;
 
-  @IsOptional()
   @IsInstant()
-  effectiveAt?: string;
+  effectiveAt: string;
 }

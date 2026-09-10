@@ -92,7 +92,7 @@ export interface ChangeServiceStatusRequest {
   status: 'in_service' | 'out_of_service';
   keeperId: string;
   reason: string;
-  effectiveAt?: string;
+  effectiveAt: string;
 }
 
 export const ISSUE_RULES = {

@@ -45,9 +45,7 @@ export class ChangeServiceStatusUseCase {
   ): Promise<ServiceStatusChangeResult> {
     const outcome = await this.transactions.run(async (session) => {
       const now = this.clock.now();
-      const effectiveAt = request.effectiveAt
-        ? requireInstant(request.effectiveAt, 'effectiveAt')
-        : now;
+      const effectiveAt = requireInstant(request.effectiveAt, 'effectiveAt');
       const asset = await this.parties.requireAsset(assetId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 

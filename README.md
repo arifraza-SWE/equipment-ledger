@@ -206,6 +206,25 @@ Server side (`apps/api/src/common/idempotency`):
 Replaying stored 4xx bodies is deliberate: the client that retries is asking "what happened to my
 request", and the answer is the same.
 
+### The key store is not the guarantee
+
+Storing the key and the ledger entry are two separate writes, so a process killed between them
+leaves a claim that looks abandoned while the movement is already on the book. No key store can
+close that on its own: after a crash the server genuinely cannot tell whether the work happened.
+
+So the ledger's own rules are the real guarantee, and the key store is the layer that gives a
+retry the original answer instead of a refusal. Every command carries the instant it happened,
+supplied by the caller and never by the server clock. A repeat of an identical request therefore
+argues for an identical entry, and the timeline check refuses it: the asset is already issued,
+already returned, already out of service, or the entry would land before one that is already
+recorded. Two executions of one command cannot both be written even if the key store lets both
+through.
+
+That is why `effectiveAt` is required on every command including a service status change. An
+optional one that defaulted to "now" would let a retry after a crash land at a different instant
+from the attempt it was repeating, and a sequence that would otherwise be refused becomes legal.
+The one place the server ever chose the instant was the hole; there is now no such place.
+
 ## Historical reconstruction: "as of"
 
 `GET /ledger/as-of?at=2026-09-08T14:20:00Z` returns every asset registered by that instant with
