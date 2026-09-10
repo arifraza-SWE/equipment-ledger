@@ -135,10 +135,7 @@ export class CorrectMovementUseCase {
         await this.corrections.attachReplacement(correction._id, replacement._id, session);
       }
       await this.movements.markSuperseded(original._id, correction._id, session);
-
-      if (!draft && original.type === 'issue' && original.reservationId) {
-        await this.reservations.reopen(original.reservationId, session);
-      }
+      await this.settleReservationLink(original, replacement, session);
 
       return {
         correction: { ...correction, replacementMovementId: replacement ? replacement._id : null },
@@ -153,6 +150,26 @@ export class CorrectMovementUseCase {
       replacement: outcome.replacement ? toMovement(outcome.replacement) : null,
       asset: await this.snapshots.assetAt(outcome.original.assetId, this.clock.now()),
     };
+  }
+
+  /**
+   * A reservation records which movement collected it. When a correction supersedes that
+   * movement the link must move to the replacement, and when the correction hands the asset to
+   * a different worker the reservation was never collected at all, so it goes back to standing.
+   */
+  private async settleReservationLink(
+    original: MovementRecord,
+    replacement: MovementRecord | null,
+    session: ClientSession,
+  ): Promise<void> {
+    if (original.type !== 'issue' || !original.reservationId) {
+      return;
+    }
+    if (replacement?.reservationId) {
+      await this.reservations.relinkFulfilment(original.reservationId, replacement._id, session);
+      return;
+    }
+    await this.reservations.reopen(original.reservationId, session);
   }
 
   private async draftReplacement(
@@ -205,6 +222,7 @@ export class CorrectMovementUseCase {
         await this.parties.requireWorker(request.workerId, session);
         changes.push({ field: 'workerId', from: original.workerId, to: request.workerId });
         fields.workerId = request.workerId;
+        fields.reservationId = null;
       }
     }
 

@@ -171,6 +171,19 @@ export class ReservationsRepository {
     }
   }
 
+  /** A correction replaces the movement that collected a reservation, so the link has to follow. */
+  async relinkFulfilment(
+    reservationId: Types.ObjectId,
+    movementId: Types.ObjectId,
+    session: ClientSession,
+  ): Promise<void> {
+    await this.reservations.updateOne(
+      { _id: reservationId, status: 'fulfilled' },
+      { $set: { fulfilledByMovementId: movementId } },
+      { session },
+    );
+  }
+
   async reopen(reservationId: Types.ObjectId, session: ClientSession): Promise<void> {
     await this.reservations.updateOne(
       { _id: reservationId, status: 'fulfilled' },

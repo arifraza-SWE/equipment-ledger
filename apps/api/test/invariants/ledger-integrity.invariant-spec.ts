@@ -1,6 +1,6 @@
 import type { AssetRecord } from '../../src/modules/assets/asset.schema';
 import type { CorrectionRecord } from '../../src/modules/ledger/persistence/correction.schema';
-import { correctMovement, issueAsset, returnAsset } from '../support/ledger-requests';
+import { correctMovement, issueAsset, reserveAsset, returnAsset } from '../support/ledger-requests';
 import { readMovements, readReservations } from '../support/mongo-readers';
 import { instant, openTestStore, type TestStore } from '../support/test-store';
 
@@ -29,6 +29,54 @@ describe('invariant: the ledger documents reference each other consistently', ()
       keeperId: 'KPR-02',
       effectiveAt: instant(0, '11:00'),
     });
+
+    const reserved = await reserveAsset(store, {
+      assetId: 'LAD-003',
+      workerId: 'WKR-008',
+      keeperId: 'KPR-01',
+      startsAt: instant(1, '08:00'),
+      endsAt: instant(1, '16:00'),
+    });
+    store.clock.set(new Date(instant(1, '08:10')));
+    const collected = await issueAsset(store, {
+      assetId: 'LAD-003',
+      workerId: 'WKR-008',
+      keeperId: 'KPR-01',
+      effectiveAt: instant(1, '08:05'),
+    });
+    expect(collected.status).toBe(201);
+    await correctMovement(
+      store,
+      (collected.body as { movement: { movementId: string } }).movement.movementId,
+      {
+        kind: 'amend',
+        reason: 'Out a few minutes earlier than written',
+        keeperId: 'KPR-01',
+        effectiveAt: instant(1, '08:02'),
+      },
+    );
+    expect((reserved.body as { reservationId: string }).reservationId).toBeTruthy();
+
+    await reserveAsset(store, {
+      assetId: 'LAD-004',
+      workerId: 'WKR-011',
+      keeperId: 'KPR-01',
+      startsAt: instant(1, '09:00'),
+      endsAt: instant(1, '17:00'),
+    });
+    store.clock.set(new Date(instant(1, '09:10')));
+    const handedToSomebodyElse = await issueAsset(store, {
+      assetId: 'LAD-004',
+      workerId: 'WKR-011',
+      keeperId: 'KPR-01',
+      effectiveAt: instant(1, '09:05'),
+    });
+    expect(handedToSomebodyElse.status).toBe(201);
+    await correctMovement(
+      store,
+      (handedToSomebodyElse.body as { movement: { movementId: string } }).movement.movementId,
+      { kind: 'amend', reason: 'Hana took it, not Grace', keeperId: 'KPR-01', workerId: 'WKR-008' },
+    );
   });
 
   afterAll(async () => {
@@ -115,7 +163,7 @@ describe('invariant: the ledger documents reference each other consistently', ()
     }
   });
 
-  it('links every fulfilled reservation to an issue of the same asset to the same worker', async () => {
+  it('links every fulfilled reservation to a movement that still counts', async () => {
     const movements = await readMovements(store.connection);
     for (const reservation of (await readReservations(store.connection)).filter(
       (candidate) => candidate.status === 'fulfilled',
@@ -123,11 +171,34 @@ describe('invariant: the ledger documents reference each other consistently', ()
       const issue = movements.find((movement) =>
         movement._id.equals(reservation.fulfilledByMovementId),
       );
-      expect(issue).toMatchObject({
-        type: 'issue',
-        assetId: reservation.assetId,
-        workerId: reservation.workerId,
+      expect({ reservationId: reservation._id.toHexString(), issue }).toMatchObject({
+        issue: {
+          type: 'issue',
+          assetId: reservation.assetId,
+          workerId: reservation.workerId,
+          supersededByCorrectionId: null,
+        },
       });
+    }
+  });
+
+  it('never leaves a movement pointing at a reservation belonging to another worker', async () => {
+    const reservations = new Map(
+      (await readReservations(store.connection)).map((reservation) => [
+        reservation._id.toHexString(),
+        reservation,
+      ]),
+    );
+    for (const movement of await readMovements(store.connection)) {
+      if (!movement.reservationId) {
+        continue;
+      }
+      const reservation = reservations.get(movement.reservationId.toHexString());
+      expect({
+        movementId: movement._id.toHexString(),
+        assetId: reservation?.assetId,
+        workerId: reservation?.workerId,
+      }).toMatchObject({ assetId: movement.assetId, workerId: movement.workerId });
     }
   });
 });

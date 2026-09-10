@@ -2,6 +2,7 @@ import type {
   AssetHistory,
   CorrectionResult,
   MovementResult,
+  Reservation,
   StoreSnapshot,
 } from '@equipment-ledger/shared';
 import { expectApiError } from '../support/expectations';
@@ -9,6 +10,7 @@ import {
   assetHistory,
   correctMovement,
   issueAsset,
+  reserveAsset,
   returnAsset,
   storeAsOf,
 } from '../support/ledger-requests';
@@ -256,6 +258,100 @@ describe('corrections', () => {
       effectiveAt: instant(0, '11:00'),
     });
     expectApiError(response, 422, 'correction_invalid');
+  });
+
+  describe('when the corrected movement collected a reservation', () => {
+    async function issueAgainstReservation(): Promise<{
+      movementId: string;
+      reservationId: string;
+    }> {
+      const created = await reserveAsset(store, {
+        assetId: 'LAD-003',
+        workerId: 'WKR-008',
+        keeperId: 'KPR-01',
+        startsAt: instant(1, '08:00'),
+        endsAt: instant(1, '16:00'),
+      });
+      const reservationId = (created.body as Reservation).reservationId;
+      store.clock.set(new Date(instant(1, '08:10')));
+      const issued = await issueAsset(store, {
+        assetId: 'LAD-003',
+        workerId: 'WKR-008',
+        keeperId: 'KPR-01',
+        effectiveAt: instant(1, '08:05'),
+      });
+      expect(issued.status).toBe(201);
+      const movement = (issued.body as MovementResult).movement;
+      expect(movement.reservationId).toBe(reservationId);
+      return { movementId: movement.movementId, reservationId };
+    }
+
+    it("moves the reservation's link onto the replacement, not the superseded movement", async () => {
+      const { movementId, reservationId } = await issueAgainstReservation();
+      const corrected = await correctMovement(store, movementId, {
+        kind: 'amend',
+        reason: 'It went out a few minutes earlier',
+        keeperId: 'KPR-01',
+        effectiveAt: instant(1, '08:02'),
+      });
+      expect(corrected.status).toBe(201);
+      const replacementId = (corrected.body as CorrectionResult).replacement?.movementId;
+
+      const reservations = (await store.http.get('/reservations').query({ assetId: 'LAD-003' }))
+        .body as Reservation[];
+      const reservation = reservations.find(
+        (candidate) => candidate.reservationId === reservationId,
+      );
+      expect(reservation).toMatchObject({
+        status: 'fulfilled',
+        fulfilledByMovementId: replacementId,
+      });
+    });
+
+    it('hands the reservation back when the correction names a different worker', async () => {
+      const { movementId, reservationId } = await issueAgainstReservation();
+      const corrected = await correctMovement(store, movementId, {
+        kind: 'amend',
+        reason: 'Sofia took it, not Hana',
+        keeperId: 'KPR-01',
+        workerId: 'WKR-006',
+      });
+      expect(corrected.status).toBe(201);
+      expect((corrected.body as CorrectionResult).replacement).toMatchObject({
+        workerId: 'WKR-006',
+        reservationId: null,
+      });
+
+      const reservations = (await store.http.get('/reservations').query({ assetId: 'LAD-003' }))
+        .body as Reservation[];
+      const reservation = reservations.find(
+        (candidate) => candidate.reservationId === reservationId,
+      );
+      expect(reservation).toMatchObject({
+        workerId: 'WKR-008',
+        status: 'active',
+        fulfilledByMovementId: null,
+      });
+    });
+
+    it('hands the reservation back when the movement is voided', async () => {
+      const { movementId, reservationId } = await issueAgainstReservation();
+      const voided = await correctMovement(store, movementId, {
+        kind: 'void',
+        reason: 'Never actually left the store',
+        keeperId: 'KPR-01',
+      });
+      expect(voided.status).toBe(201);
+
+      const reservations = (await store.http.get('/reservations').query({ assetId: 'LAD-003' }))
+        .body as Reservation[];
+      expect(
+        reservations.find((candidate) => candidate.reservationId === reservationId),
+      ).toMatchObject({
+        status: 'active',
+        fulfilledByMovementId: null,
+      });
+    });
   });
 
   it('refuses a correction without a reason', async () => {
