@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { AssetStatusBadge } from '@/components/AssetStatusBadge';
 import { Instant } from '@/components/Instant';
 import { StatusBadge } from '@/components/StatusBadge';
+import { classNames } from '@/lib/class-names';
 import { formatWindow } from '@/lib/site-time';
 import { workerNameOr, type WorkerNamesById } from '@/features/workers/worker-names';
 import styles from './AssetLedgerTable.module.css';
@@ -47,7 +48,10 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
       <td>
         {holding ? <Instant iso={holding.effectiveAt} compact /> : <span className="muted">–</span>}
       </td>
-      <td className={snapshot.overdue ? styles.overdueDue : undefined}>
+      <td
+        data-wrap="narrow"
+        className={classNames(styles.dueColumn, snapshot.overdue && styles.overdueDue)}
+      >
         {holding?.dueAt ? (
           <>
             <Instant iso={holding.dueAt} compact />
@@ -57,7 +61,9 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
           <span className="muted">–</span>
         )}
       </td>
-      <td>{describeReservation(snapshot, workerNamesById)}</td>
+      <td data-wrap="narrow" className={styles.reservationColumn}>
+        {describeReservation(snapshot, workerNamesById)}
+      </td>
       {showActions && (
         <td className={styles.actionsCell}>
           {issuable && (

@@ -44,6 +44,12 @@
   min-width: 200px;
 }
 
+/* Wraps without imposing a width, for a column that sets its own. */
+.table td[data-wrap='narrow'],
+.table th[data-wrap='narrow'] {
+  white-space: normal;
+}
+
 .table td[data-numeric='true'] {
   text-align: right;
   font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
@@ -52,5 +58,29 @@
 .sticky thead th {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 3;
+}
+
+/* A wide table still scrolls sideways on a narrow window; the row header stays put so a row
+   never loses the identifier that names it. */
+.pinFirst thead th:first-child,
+.pinFirst tbody th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.pinFirst thead th:first-child {
+  z-index: 4;
+}
+
+.pinFirst thead th:first-child::after,
+.pinFirst tbody th:first-child::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline);
 }

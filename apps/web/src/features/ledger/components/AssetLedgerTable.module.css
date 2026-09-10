@@ -68,6 +68,18 @@
   font-size: 12px;
 }
 
+/* These two columns carry a sentence rather than a value. Letting them wrap keeps the table
+   inside the page instead of pushing the row's identifier off the left edge. */
+.reservationColumn {
+  white-space: normal;
+  min-width: 158px;
+}
+
+.dueColumn {
+  white-space: normal;
+  min-width: 92px;
+}
+
 .actionsCell {
   display: flex;
   gap: 12px;

@@ -29,7 +29,7 @@ export function AssetLedgerTable({ assets, workerNamesById, mode }: AssetLedgerT
           Clear the search or widen the status and kind filters.
         </EmptyState>
       ) : (
-        <DataTable caption="Assets in the store" stickyHeader>
+        <DataTable caption="Assets in the store" stickyHeader pinFirstColumn>
           <thead>
             <tr>
               <th scope="col">Asset</th>
