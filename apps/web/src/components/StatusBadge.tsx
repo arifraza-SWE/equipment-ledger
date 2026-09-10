@@ -15,5 +15,10 @@ const TONE_CLASS = {
 } satisfies Record<BadgeTone, string | undefined>;
 
 export function StatusBadge({ tone, children }: { tone: BadgeTone; children: ReactNode }) {
-  return <span className={classNames(styles.badge, TONE_CLASS[tone])}>{children}</span>;
+  return (
+    <span className={classNames(styles.badge, TONE_CLASS[tone])}>
+      <span className={styles.dot} aria-hidden="true" />
+      {children}
+    </span>
+  );
 }

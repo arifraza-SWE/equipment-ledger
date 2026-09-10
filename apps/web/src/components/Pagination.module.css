@@ -53,13 +53,14 @@
 .page:hover {
   background: var(--card-tint);
   color: var(--ink);
+  text-decoration: none;
 }
 
 .page[aria-current='page'] {
-  border-color: var(--hairline-strong);
-  background: var(--card);
-  color: var(--ink);
-  font-weight: 500;
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-weight: 600;
 }
 
 .step[aria-disabled='true'],

@@ -1,8 +1,8 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  max-width: 540px;
+  gap: var(--space-5);
+  max-width: 560px;
 }
 
 .field {
@@ -13,7 +13,7 @@
 
 .label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .optional {
@@ -24,12 +24,26 @@
 .control {
   font: inherit;
   font-size: 14px;
-  padding: 7px 9px;
-  border: 1px solid var(--hairline-strong);
+  min-height: 38px;
+  padding: 8px var(--space-3);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius);
   background: var(--card);
   color: var(--ink);
   width: 100%;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--hairline-strong);
+}
+
+.control:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
 }
 
 .control:disabled {
@@ -67,7 +81,7 @@ textarea.control {
 
 .checkboxField input {
   margin: 3px 0 0;
-  accent-color: var(--ink);
+  accent-color: var(--accent);
 }
 
 .checkboxLabel {
@@ -105,7 +119,7 @@ textarea.control {
 
 .radio input {
   margin: 0;
-  accent-color: var(--ink);
+  accent-color: var(--accent);
 }
 
 .actions {
@@ -132,7 +146,7 @@ textarea.control {
 .summary dt {
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--ink-muted);
   margin-bottom: 2px;
 }

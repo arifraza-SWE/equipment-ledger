@@ -1,18 +1,37 @@
 .empty {
-  border: 1px dashed var(--hairline-strong);
-  border-radius: var(--radius);
-  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
   text-align: center;
   color: var(--ink-soft);
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--card-tint);
+  color: var(--ink-muted);
 }
 
 .title {
   margin: 0;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--ink);
 }
 
 .body {
-  margin-top: 6px;
-  font-size: 13px;
+  margin: 0;
+  font-size: 13.5px;
+  max-width: 46ch;
 }

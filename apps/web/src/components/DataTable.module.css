@@ -2,39 +2,57 @@
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--hairline);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--card);
+  box-shadow: var(--shadow-sm);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
 }
 
 .table th,
 .table td {
-  padding: 8px 10px;
+  padding: var(--space-3) var(--space-4);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
   border-bottom: 1px solid var(--hairline);
   white-space: nowrap;
 }
 
 .table th {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--ink-muted);
   background: var(--card-tint);
+  vertical-align: middle;
 }
 
-.table tbody tr:last-child td {
+.table tbody th {
+  font-size: 13.5px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--card);
+  font-weight: 500;
+}
+
+.table tbody tr:last-child td,
+.table tbody tr:last-child th {
   border-bottom: 0;
 }
 
-.table tbody tr:hover td {
+.table tbody tr {
+  transition: background var(--transition);
+}
+
+.table tbody tr:hover td,
+.table tbody tr:hover th {
   background: var(--card-tint);
 }
 
@@ -53,8 +71,12 @@
 .table td[data-numeric='true'] {
   text-align: right;
   font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
+/* The wrapper sets overflow-x, which makes it a scroll container on both axes, so the header
+   sticks to the wrapper rather than the viewport. Any offset here would push it down over the
+   first row instead. */
 .sticky thead th {
   position: sticky;
   top: 0;
@@ -83,4 +105,11 @@
   bottom: 0;
   width: 1px;
   background: var(--hairline);
+}
+
+@media (max-width: 900px) {
+  .table th,
+  .table td {
+    padding: var(--space-3);
+  }
 }

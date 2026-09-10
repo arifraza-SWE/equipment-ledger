@@ -2,9 +2,10 @@
   border: 1px solid var(--hairline);
   border-left-width: 3px;
   border-radius: var(--radius);
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 13.5px;
   background: var(--card);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
@@ -32,14 +33,21 @@
 }
 
 .success {
+  border-color: var(--status-in-store-border);
   border-left-color: var(--status-in-store-fg);
+  background: var(--status-in-store-bg);
+  color: var(--status-in-store-fg);
 }
 
 .info {
-  border-left-color: var(--ink-soft);
+  border-color: var(--accent-border);
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
 }
 
 .warning {
+  border-color: var(--status-issued-border);
   border-left-color: var(--status-issued-fg);
   background: var(--status-issued-bg);
   color: var(--status-issued-fg);
