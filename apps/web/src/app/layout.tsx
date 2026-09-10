@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { ApiUnreachableBanner } from '@/components/ApiUnreachableBanner';
-import { AppFooter } from '@/components/AppFooter';
 import { AppHeader } from '@/components/AppHeader';
 import { KeeperProvider } from '@/components/KeeperProvider';
 import shellStyles from '@/components/AppShell.module.css';
@@ -47,7 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <AppHeader />
           {bannerMessage && <ApiUnreachableBanner message={bannerMessage} />}
           <main className={shellStyles.main}>{children}</main>
-          <AppFooter />
         </KeeperProvider>
       </body>
     </html>
