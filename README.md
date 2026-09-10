@@ -367,6 +367,33 @@ types, 12 workers, 3 keepers, thirty days of same-day loans, and these named sit
 
 The seed refuses to run when `NODE_ENV=production`.
 
+## A three-minute walk through
+
+The order the demo recording follows. Seed first; every asset named below is where this says it
+is straight after `npm run seed`.
+
+1. **The ledger.** Open `/`. Sixty assets, three out, one of them overdue (`HARN-003`, with
+   Callum Reid since four days ago), two out of service.
+2. **A normal issue.** Issue `DRL-003` to Amira Haddad. The result shows when it went out and
+   when that was written down, as two values.
+3. **A refused issue.** Issue `GAS-004` to Liam Doherty. The form warns before you submit and
+   the store refuses with the certificate and the date it lapsed.
+4. **Two at once.** `scripts/concurrent-issue.sh HARN-014 20` in a terminal: one 201, nineteen
+   409s, and the refusals name the worker who won. Refresh the ledger; one holder.
+5. **A backdated return.** Return `DRL-007` and set the time to 09:00 this morning. The history
+   for `DRL-007` shows 09:00 as when it happened and the current time as when it was written.
+6. **A correction.** On that return, choose Correct, set the time to 08:15 and give a reason.
+   The history now shows the original struck through, the correction with its reason, and the
+   replacement. Nothing was deleted.
+7. **A reservation clash.** On `/reservations`, try `TWR-001` for a window overlapping the one
+   Priya Raman holds the day after tomorrow. Refused, and the existing reservation is untouched.
+   Try `12:00` to `14:00` instead, exactly when hers ends: accepted.
+8. **An hour before all of this.** On `/as-of`, pick an instant before step 2. `DRL-003` is in
+   store and `DRL-007` is still out with Sofia Marchetti. Ask for two days ago at 14:20 and
+   `GAS-001` is with Daniel Okafor.
+9. **The same thing in Mongo.** `docker compose exec mongo mongosh equipment_ledger` and read the
+   `movements` collection for one of those assets. Same instants, same order.
+
 ## API
 
 Resource-oriented, JSON in and out, every error in one shape:
