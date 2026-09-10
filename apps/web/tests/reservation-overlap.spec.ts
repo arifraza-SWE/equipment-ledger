@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { chooseKeeper, toSiteWallClock, utcDateWithOffset } from './helpers';
+import { chooseKeeper, toSiteWallClock, utcDateWithOffset, waitForHydration } from './helpers';
 
 test('a reservation overlapping the seeded TWR-001 window is refused with the overlap message', async ({
   page,
 }) => {
   const day = utcDateWithOffset(2);
   await page.goto('/reservations');
+  await waitForHydration(page);
   await chooseKeeper(page);
 
   await page.getByLabel('Asset', { exact: true }).selectOption('TWR-001');

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { chooseKeeper } from './helpers';
+import { chooseKeeper, waitForHydration } from './helpers';
 
 const effectiveIssueEntries = (page: Page) =>
   page.locator('[data-movement-type="issue"][data-superseded="false"]');
@@ -9,6 +9,7 @@ test('double-clicking submit issues DRL-003 exactly once', async ({ page }) => {
   const issueEntriesBefore = await effectiveIssueEntries(page).count();
 
   await page.goto('/issue?assetId=DRL-003');
+  await waitForHydration(page);
   await chooseKeeper(page);
   await expect(page.getByLabel('Asset', { exact: true })).toHaveValue('DRL-003');
   await page.getByLabel('Worker', { exact: true }).selectOption('WKR-008');

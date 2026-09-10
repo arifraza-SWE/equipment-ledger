@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { chooseKeeper } from './helpers';
+import { chooseKeeper, waitForHydration } from './helpers';
 
 test('issuing GAS-005 to WKR-007 shows the API certificate-expired message', async ({ page }) => {
   await page.goto('/issue?assetId=GAS-005');
+  await waitForHydration(page);
   await chooseKeeper(page);
   await page.getByLabel('Worker', { exact: true }).selectOption('WKR-007');
 
