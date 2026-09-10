@@ -1,19 +1,36 @@
-.columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 32px;
-  align-items: start;
+/* One column, so the table gets the full page width and never has to scroll sideways.
+   The create panel sits across the top instead of stealing 380px from the table. */
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-.formColumn {
+.createPanel {
   border: 1px solid var(--hairline);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--card);
-  padding: 16px 18px 20px;
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
-@media (max-width: 1000px) {
-  .columns {
-    grid-template-columns: minmax(0, 1fr);
+.createHeading {
+  margin: 0 0 var(--space-4);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.listSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (max-width: 700px) {
+  .createPanel {
+    padding: var(--space-4);
   }
 }

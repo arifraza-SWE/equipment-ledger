@@ -42,8 +42,15 @@ export default async function ReservationsPage({
   return (
     <>
       <PageHeader title="Reservations" lede="Claims on assets for a future window." />
-      <div className={styles.columns}>
-        <section aria-labelledby="reservations-heading">
+      <div className={styles.layout}>
+        <section className={styles.createPanel} aria-labelledby="new-reservation-heading">
+          <h2 id="new-reservation-heading" className={styles.createHeading}>
+            New reservation
+          </h2>
+          <ReservationForm assets={assets} workers={workers} inline />
+        </section>
+
+        <section className={styles.listSection} aria-labelledby="reservations-heading">
           <h2 id="reservations-heading" className="visually-hidden">
             Existing reservations
           </h2>
@@ -62,12 +69,6 @@ export default async function ReservationsPage({
             unit="reservations"
             hrefForPage={(target) => reservationsHref(statusFilter, target)}
           />
-        </section>
-        <section className={styles.formColumn} aria-labelledby="new-reservation-heading">
-          <h2 id="new-reservation-heading" className="section-label">
-            New reservation
-          </h2>
-          <ReservationForm assets={assets} workers={workers} />
         </section>
       </div>
     </>

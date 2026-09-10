@@ -8,6 +8,7 @@ import type {
 } from '@equipment-ledger/shared';
 import { useState, type FormEvent } from 'react';
 import { DatetimeField } from '@/components/DatetimeField';
+import { classNames } from '@/lib/class-names';
 import { useSelectedKeeper } from '@/components/KeeperProvider';
 import { NoteField } from '@/components/NoteField';
 import { Notice } from '@/components/Notice';
@@ -25,6 +26,8 @@ import { ReservationWindow } from './ReservationWindow';
 interface ReservationFormProps {
   assets: AssetSnapshot[];
   workers: Worker[];
+  /** Lay the fields across the page rather than down it. */
+  inline?: boolean;
 }
 
 interface ReservationFormValues {
@@ -47,7 +50,7 @@ const EMPTY_VALUES: ReservationFormValues = {
 
 const PAST_TOLERANCE_MILLIS = 2 * 60 * 1000;
 
-export function ReservationForm({ assets, workers }: ReservationFormProps) {
+export function ReservationForm({ assets, workers, inline = false }: ReservationFormProps) {
   const { selectedKeeper } = useSelectedKeeper();
   const [values, setValues] = useState<ReservationFormValues>(EMPTY_VALUES);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -86,7 +89,11 @@ export function ReservationForm({ assets, workers }: ReservationFormProps) {
   };
 
   return (
-    <form className={formStyles.form} onSubmit={handleSubmit} noValidate>
+    <form
+      className={classNames(formStyles.form, inline && formStyles.formInline)}
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <AssetField
         label="Asset"
         assets={assets}
