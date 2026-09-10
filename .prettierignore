@@ -3,3 +3,6 @@ dist
 .next
 coverage
 package-lock.json
+
+# prose is hand-wrapped; prettier reflows tables into unreadable lines
+*.md

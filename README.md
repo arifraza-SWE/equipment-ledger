@@ -52,16 +52,16 @@ scripts/replay-request.sh DRL-003 WKR-001  # same request three times, lands onc
 
 Everything lives in one `.env` at the repository root; `.env.example` documents each value.
 
-| Variable                    | Used by   | Meaning                                                                           |
-| --------------------------- | --------- | --------------------------------------------------------------------------------- |
-| `MONGODB_URI`               | API, seed | Connection string. Must point at a replica set: the API uses transactions.        |
-| `MONGODB_TEST_URI`          | tests     | Same, different database name. Wiped before every test file.                      |
-| `SITE_TIMEZONE`             | API       | The clock the site keeps. Used for every date and time the API puts in a message. |
-| `NEXT_PUBLIC_SITE_TIMEZONE` | web       | The same zone for the screens. Keep the two identical.                            |
-| `API_PORT`                  | API       | Defaults to 4000.                                                                 |
-| `WEB_ORIGIN`                | API       | The origin allowed by CORS, normally `http://localhost:3000`.                     |
-| `NEXT_PUBLIC_API_URL`       | web       | Where the browser and the Next.js server reach the API.                           |
-| `SEED_ANCHOR_DATE`          | seed      | Optional `YYYY-MM-DD`. Pins the seed's "today".                                   |
+| Variable | Used by | Meaning |
+| --- | --- | --- |
+| `MONGODB_URI` | API, seed | Connection string. Must point at a replica set: the API uses transactions. |
+| `MONGODB_TEST_URI` | tests | Same, different database name. Wiped before every test file. |
+| `SITE_TIMEZONE` | API | The clock the site keeps. Used for every date and time the API puts in a message. |
+| `NEXT_PUBLIC_SITE_TIMEZONE` | web | The same zone for the screens. Keep the two identical. |
+| `API_PORT` | API | Defaults to 4000. |
+| `WEB_ORIGIN` | API | The origin allowed by CORS, normally `http://localhost:3000`. |
+| `NEXT_PUBLIC_API_URL` | web | Where the browser and the Next.js server reach the API. |
+| `SEED_ANCHOR_DATE` | seed | Optional `YYYY-MM-DD`. Pins the seed's "today". |
 
 There are no secrets in this project. Nothing is committed that should not be.
 
@@ -98,15 +98,15 @@ the thing that would disagree does not exist.
 
 ### Collections and indexes
 
-| Collection            | What is in it                                                                                    | Indexes beyond `_id`                                                                                                                                                                                                                                         |
-| --------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `assets`              | one document per tag; `_id` is the tag. Holds `version`, a counter every ledger write increments | none needed at this size; `_id` covers lookups                                                                                                                                                                                                               |
-| `workers`             | `_id` is the worker id; certificates embedded (they belong to the worker and are read with it)   | none                                                                                                                                                                                                                                                         |
-| `keepers`             | the people who can be picked from the list                                                       | none                                                                                                                                                                                                                                                         |
-| `movements`           | the ledger                                                                                       | `{assetId, effectiveAt, sequence}` for an asset's timeline and history; `{supersededByCorrectionId, effectiveAt}` for the as-of scan over effective entries; `{workerId, effectiveAt}` for a worker's page; `{recordedAt, _id}` for the paged ledger listing |
-| `corrections`         | one per corrected movement                                                                       | `{originalMovementId}` unique, which is a second, database-level guarantee that a movement is corrected at most once; `{assetId, recordedAt}` for history                                                                                                    |
-| `reservations`        | claims with their outcome                                                                        | `{assetId, status, startsAt}` for the overlap check; `{workerId, startsAt}`; `{endsAt, startsAt}` for "what stood at this instant"                                                                                                                           |
-| `idempotency_records` | one per `Idempotency-Key` seen                                                                   | TTL on `claimedAt`, 24 hours                                                                                                                                                                                                                                 |
+| Collection | What is in it | Indexes beyond `_id` |
+| --- | --- | --- |
+| `assets` | one document per tag; `_id` is the tag. Holds `version`, a counter every ledger write increments | none needed at this size; `_id` covers lookups |
+| `workers` | `_id` is the worker id; certificates embedded (they belong to the worker and are read with it) | none |
+| `keepers` | the people who can be picked from the list | none |
+| `movements` | the ledger | `{assetId, effectiveAt, sequence}` for an asset's timeline and history; `{supersededByCorrectionId, effectiveAt}` for the as-of scan over effective entries; `{workerId, effectiveAt}` for a worker's page; `{recordedAt, _id}` for the paged ledger listing |
+| `corrections` | one per corrected movement | `{originalMovementId}` unique, which is a second, database-level guarantee that a movement is corrected at most once; `{assetId, recordedAt}` for history |
+| `reservations` | claims with their outcome | `{assetId, status, startsAt}` for the overlap check; `{workerId, startsAt}`; `{endsAt, startsAt}` for "what stood at this instant" |
+| `idempotency_records` | one per `Idempotency-Key` seen | TTL on `claimedAt`, 24 hours |
 
 `sequence` on a movement is the asset's `version` at the moment the movement was written. It only
 matters when two entries share an `effectiveAt`; then the lower sequence comes first. A
@@ -350,20 +350,20 @@ What is in it: 60 assets across nine kinds (14 harnesses, 6 gas detectors, 10 dr
 grinders, 8 ladders, 4 laser levels, 4 towers, 4 cut-off saws, 4 radios), four certificate
 types, 12 workers, 3 keepers, thirty days of same-day loans, and these named situations:
 
-| To demonstrate                           | Use                                                                                                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| a normal issue                           | `DRL-003`, in store, needs no certificate                                                                                                  |
-| a refused issue / expired certificate    | `GAS-004` to `WKR-007` (Liam Doherty), whose Gas Detection certificate expired yesterday; he held `GAS-004` ten days ago when it was valid |
-| a concurrent issue                       | `HARN-014`, in store; `WKR-001/002/003/005/012` are all certified                                                                          |
-| a backdated return                       | `DRL-007`, out with `WKR-006` since yesterday 07:35                                                                                        |
-| a correction already in the book         | `GRN-002`: return written as 17:00 nine days ago, corrected to 15:30 forty minutes later, reason recorded                                  |
-| a late-logged entry                      | `LAD-002`: returned 09:00 five days ago, written down at 11:40                                                                             |
-| a reservation clash                      | `TWR-001`, reserved by `WKR-003` the day after tomorrow 08:00-12:00; `LVL-001` has two adjacent windows the same day                       |
-| an uncollected reservation               | `DRL-001`, reserved by `WKR-009` three days ago, never issued                                                                              |
-| out of service                           | `GAS-002` (failed bump test six days ago; its reservation was voided), `SAW-003` (returned damaged two days ago)                           |
-| an overdue asset                         | `HARN-003`, out with `WKR-004` since four days ago, due back that evening                                                                  |
-| a certificate expiring inside the window | `WKR-004` (Callum Reid), Working at Height, expires in three days                                                                          |
-| a historical question                    | two days ago at 14:20, `GAS-001` was with `WKR-005` (Daniel Okafor); eight assets were out in total                                        |
+| To demonstrate | Use |
+| --- | --- |
+| a normal issue | `DRL-003`, in store, needs no certificate |
+| a refused issue / expired certificate | `GAS-004` to `WKR-007` (Liam Doherty), whose Gas Detection certificate expired yesterday; he held `GAS-004` ten days ago when it was valid |
+| a concurrent issue | `HARN-014`, in store; `WKR-001/002/003/005/012` are all certified |
+| a backdated return | `DRL-007`, out with `WKR-006` since yesterday 07:35 |
+| a correction already in the book | `GRN-002`: return written as 17:00 nine days ago, corrected to 15:30 forty minutes later, reason recorded |
+| a late-logged entry | `LAD-002`: returned 09:00 five days ago, written down at 11:40 |
+| a reservation clash | `TWR-001`, reserved by `WKR-003` the day after tomorrow 08:00-12:00; `LVL-001` has two adjacent windows the same day |
+| an uncollected reservation | `DRL-001`, reserved by `WKR-009` three days ago, never issued |
+| out of service | `GAS-002` (failed bump test six days ago; its reservation was voided), `SAW-003` (returned damaged two days ago) |
+| an overdue asset | `HARN-003`, out with `WKR-004` since four days ago, due back that evening |
+| a certificate expiring inside the window | `WKR-004` (Callum Reid), Working at Height, expires in three days |
+| a historical question | two days ago at 14:20, `GAS-001` was with `WKR-005` (Daniel Okafor); eight assets were out in total |
 
 The seed refuses to run when `NODE_ENV=production`.
 
@@ -385,18 +385,18 @@ issued, overlapping reservation, already corrected), 422 a rule refusal (certifi
 service, timeline). Stack traces never leave the process; 5xx bodies are generic and the detail
 goes to the log.
 
-| Method and path                                                       | Purpose                                                             |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `GET /assets`, `GET /assets/:assetId`                                 | current state, derived from the ledger                              |
-| `GET /assets/:assetId/history`                                        | every movement including superseded ones, corrections, reservations |
-| `POST /assets/:assetId/service-status`                                | withdraw or restore                                                 |
-| `GET /workers`, `GET /workers/:workerId`, `GET /keepers`              | the lists the keeper picks from                                     |
-| `GET /reservations`, `POST /reservations`, `DELETE /reservations/:id` | claims                                                              |
-| `POST /movements/issues`, `POST /movements/returns`                   | the two hatch actions                                               |
-| `POST /movements/:movementId/corrections`                             | amend or void                                                       |
-| `GET /ledger/as-of?at=`                                               | the store at an instant                                             |
-| `GET /ledger/movements?assetId&workerId&from&to&cursor&limit`         | the paged ledger, newest first                                      |
-| `GET /health`                                                         | database connectivity                                               |
+| Method and path | Purpose |
+| --- | --- |
+| `GET /assets`, `GET /assets/:assetId` | current state, derived from the ledger |
+| `GET /assets/:assetId/history` | every movement including superseded ones, corrections, reservations |
+| `POST /assets/:assetId/service-status` | withdraw or restore |
+| `GET /workers`, `GET /workers/:workerId`, `GET /keepers` | the lists the keeper picks from |
+| `GET /reservations`, `POST /reservations`, `DELETE /reservations/:id` | claims |
+| `POST /movements/issues`, `POST /movements/returns` | the two hatch actions |
+| `POST /movements/:movementId/corrections` | amend or void |
+| `GET /ledger/as-of?at=` | the store at an instant |
+| `GET /ledger/movements?assetId&workerId&from&to&cursor&limit` | the paged ledger, newest first |
+| `GET /health` | database connectivity |
 
 ## Testing
 

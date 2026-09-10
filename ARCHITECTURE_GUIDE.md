@@ -100,15 +100,15 @@ scripts/                   Two shell scripts that reproduce the concurrency and 
 
 Read these seven and you have the system.
 
-| File                                                         | What it does                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api/src/modules/ledger/domain/asset-timeline.ts`       | The heart. Pure functions over a list of movements: sort them, replay them into a state, find the state at an instant, and decide whether a proposed sequence is possible. No database, no Nest. Every write validates through `findTimelineViolation`; every read derives through `replayTimeline` or `stateAt`. |
-| `apps/api/src/modules/movements/issue-asset.use-case.ts`     | The clearest example of a command: one transaction, read the parties and the timeline, resolve a reservation, build the candidate entry, check the whole timeline with it, check the certificate at the effective instant, claim the write, insert.                                                               |
-| `apps/api/src/modules/assets/assets.repository.ts`           | `claimLedgerWrite` is the line that makes two simultaneous issues impossible. It bumps `assets.version` inside the caller's transaction; MongoDB refuses to let two transactions do that to the same document.                                                                                                    |
-| `apps/api/src/database/transaction-runner.ts`                | Runs a unit of work in a snapshot transaction and re-runs it, with jittered backoff, when MongoDB reports a write conflict. The loser of a race re-reads and gets the proper refusal instead of an internal error.                                                                                                |
-| `apps/api/src/modules/ledger/store-snapshot.service.ts`      | Answers "what did the store look like at this instant" from the movements collection. The dashboard is this with instant = now. Nothing else knows how state is derived.                                                                                                                                          |
-| `apps/api/src/common/idempotency/idempotency.interceptor.ts` | Claims the key before the handler runs, stores the answer after, replays it next time.                                                                                                                                                                                                                            |
-| `apps/web/src/hooks/use-ledger-submission.ts`                | The other half of idempotency. Owns the key, sends it, decides what the screen is allowed to claim, and refreshes the server data on success.                                                                                                                                                                     |
+| File | What it does |
+| --- | --- |
+| `apps/api/src/modules/ledger/domain/asset-timeline.ts` | The heart. Pure functions over a list of movements: sort them, replay them into a state, find the state at an instant, and decide whether a proposed sequence is possible. No database, no Nest. Every write validates through `findTimelineViolation`; every read derives through `replayTimeline` or `stateAt`. |
+| `apps/api/src/modules/movements/issue-asset.use-case.ts` | The clearest example of a command: one transaction, read the parties and the timeline, resolve a reservation, build the candidate entry, check the whole timeline with it, check the certificate at the effective instant, claim the write, insert. |
+| `apps/api/src/modules/assets/assets.repository.ts` | `claimLedgerWrite` is the line that makes two simultaneous issues impossible. It bumps `assets.version` inside the caller's transaction; MongoDB refuses to let two transactions do that to the same document. |
+| `apps/api/src/database/transaction-runner.ts` | Runs a unit of work in a snapshot transaction and re-runs it, with jittered backoff, when MongoDB reports a write conflict. The loser of a race re-reads and gets the proper refusal instead of an internal error. |
+| `apps/api/src/modules/ledger/store-snapshot.service.ts` | Answers "what did the store look like at this instant" from the movements collection. The dashboard is this with instant = now. Nothing else knows how state is derived. |
+| `apps/api/src/common/idempotency/idempotency.interceptor.ts` | Claims the key before the handler runs, stores the answer after, replays it next time. |
+| `apps/web/src/hooks/use-ledger-submission.ts` | The other half of idempotency. Owns the key, sends it, decides what the screen is allowed to claim, and refreshes the server data on success. |
 
 ## 4. What happens when an asset is issued
 
@@ -231,15 +231,15 @@ corrections: C1 { originalMovementId: <the 11:00 one>, replacementMovementId: <t
 
 ## 11. Database
 
-| Collection            | Key fields                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `assets`              | `_id` is the tag. `version` counts ledger writes and is the concurrency guard and the sequence source. `registeredAt` bounds how far back movements may be dated.                                |
-| `workers`             | `_id` is the worker id. `certifications[]` embedded, each with `type`, `issuedAt`, `expiresAt`.                                                                                                  |
-| `keepers`             | `_id`, `fullName`.                                                                                                                                                                               |
-| `movements`           | `assetId`, `type`, `workerId`, `returnedByWorkerId`, `keeperId`, `effectiveAt`, `recordedAt`, `dueAt`, `reservationId`, `note`, `sequence`, `supersededByCorrectionId`, `createdByCorrectionId`. |
-| `corrections`         | `originalMovementId` (unique), `replacementMovementId`, `kind`, `reason`, `keeperId`, `recordedAt`, `changes[]`.                                                                                 |
-| `reservations`        | `assetId`, `workerId`, `startsAt`, `endsAt`, `status`, `fulfilledByMovementId`, `closedAt`, `closedReason`.                                                                                      |
-| `idempotency_records` | `_id` is the key. `requestFingerprint`, `status`, `response`, `claimedAt` (TTL 24h).                                                                                                             |
+| Collection | Key fields |
+| --- | --- |
+| `assets` | `_id` is the tag. `version` counts ledger writes and is the concurrency guard and the sequence source. `registeredAt` bounds how far back movements may be dated. |
+| `workers` | `_id` is the worker id. `certifications[]` embedded, each with `type`, `issuedAt`, `expiresAt`. |
+| `keepers` | `_id`, `fullName`. |
+| `movements` | `assetId`, `type`, `workerId`, `returnedByWorkerId`, `keeperId`, `effectiveAt`, `recordedAt`, `dueAt`, `reservationId`, `note`, `sequence`, `supersededByCorrectionId`, `createdByCorrectionId`. |
+| `corrections` | `originalMovementId` (unique), `replacementMovementId`, `kind`, `reason`, `keeperId`, `recordedAt`, `changes[]`. |
+| `reservations` | `assetId`, `workerId`, `startsAt`, `endsAt`, `status`, `fulfilledByMovementId`, `closedAt`, `closedReason`. |
+| `idempotency_records` | `_id` is the key. `requestFingerprint`, `status`, `response`, `claimedAt` (TTL 24h). |
 
 Relationships are by id, resolved in the service layer. There are no Mongoose `populate` calls:
 the name lookups are explicit batch reads (`findByIds`), which is why no list endpoint does one
@@ -274,12 +274,12 @@ cancelling a reservation. Reads use no transaction.
 
 ## 13. Tests: what each suite proves
 
-| Suite                       | Command                   | What it proves                                                                                                                                                                                                                                            |
-| --------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api/src/**/*.spec.ts` | `npm run test:unit`       | The pure rules in isolation: timeline validity and replay, `stateAt` boundaries, certificates judged at an instant, reservation windows, snapshot assembly, request fingerprints, instant parsing, the site clock.                                        |
-| `apps/api/test/e2e`         | `npm run test:e2e`        | The API over HTTP against a seeded database with a frozen clock: every success and every refusal named in the brief, with the exact messages.                                                                                                             |
-| `apps/api/test/invariants`  | `npm run test:invariants` | The properties, checked against raw documents rather than the API: one holder, no overlap, no lapsed certificate, no issue while out of service, no duplicate on repeat, as-of equals an independent replay, documents reference each other consistently. |
-| `apps/web/tests`            | `npm run test:web`        | The screens: the dashboard, a double-clicked issue landing once, a refused issue showing the API's sentence, the as-of view, a reservation clash. The browser runs in a different timezone from the site on purpose.                                      |
+| Suite | Command | What it proves |
+| --- | --- | --- |
+| `apps/api/src/**/*.spec.ts` | `npm run test:unit` | The pure rules in isolation: timeline validity and replay, `stateAt` boundaries, certificates judged at an instant, reservation windows, snapshot assembly, request fingerprints, instant parsing, the site clock. |
+| `apps/api/test/e2e` | `npm run test:e2e` | The API over HTTP against a seeded database with a frozen clock: every success and every refusal named in the brief, with the exact messages. |
+| `apps/api/test/invariants` | `npm run test:invariants` | The properties, checked against raw documents rather than the API: one holder, no overlap, no lapsed certificate, no issue while out of service, no duplicate on repeat, as-of equals an independent replay, documents reference each other consistently. |
+| `apps/web/tests` | `npm run test:web` | The screens: the dashboard, a double-clicked issue landing once, a refused issue showing the API's sentence, the as-of view, a reservation clash. The browser runs in a different timezone from the site on purpose. |
 
 The e2e and invariant suites boot the real Nest application on an ephemeral port and re-seed
 before each file, so they are order-independent.
