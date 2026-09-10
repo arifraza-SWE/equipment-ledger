@@ -102,7 +102,7 @@ Read these seven and you have the system.
 
 | File | What it does |
 | --- | --- |
-| `apps/api/src/modules/ledger/domain/asset-timeline.ts` | The heart. Pure functions over a list of movements: sort them, replay them into a state, find the state at an instant, and decide whether a proposed sequence is possible. No database, no Nest. Every write validates through `findTimelineViolation`; every read derives through `replayTimeline` or `stateAt`. |
+| `apps/api/src/modules/ledger/domain/asset-timeline.ts` | The heart. Pure functions over a list of movements: sort them, replay them into a state, find the state at an instant, and decide whether a proposed sequence is possible. Also where the two tracks live (`trackOf`, `lastEntryOnTrack`): holding and service are separate stories told by one collection. No database, no Nest. Every write validates through `findTimelineViolation`; every read derives through `replayTimeline` or `stateAt`. |
 | `apps/api/src/modules/movements/issue-asset.use-case.ts` | The clearest example of a command: one transaction, read the parties and the timeline, resolve a reservation, build the candidate entry, check the whole timeline with it, check the certificate at the effective instant, claim the write, insert. |
 | `apps/api/src/modules/assets/assets.repository.ts` | `claimLedgerWrite` is the line that makes two simultaneous issues impossible. It bumps `assets.version` inside the caller's transaction; MongoDB refuses to let two transactions do that to the same document. |
 | `apps/api/src/database/transaction-runner.ts` | Runs a unit of work in a snapshot transaction and re-runs it, with jittered backoff, when MongoDB reports a write conflict. The loser of a race re-reads and gets the proper refusal instead of an internal error. |
@@ -115,7 +115,8 @@ Read these seven and you have the system.
 1. `IssueAssetForm` collects asset, worker, time, optional due time, note, and reads the keeper
    from the header. `useLedgerSubmission` refuses to fire twice at once and attaches the key.
 2. `POST /movements/issues` with `Idempotency-Key`.
-3. `IdempotencyInterceptor` fingerprints the request and inserts the claim. A duplicate key with
+3. `IdempotencyInterceptor` fingerprints the request and inserts the claim, taking a claim token
+   that only this attempt may use to write the answer. A duplicate key with
    the same body returns the stored answer and stops here.
 4. `ValidationPipe` checks the DTO: identifiers look like identifiers, `effectiveAt` is a real
    ISO instant with a zone, no unknown fields.
@@ -150,7 +151,12 @@ Same shape, in `ReturnAssetUseCase`. The differences worth knowing:
 - A return at or before the instant of the issue it closes is refused.
 - `takeOutOfService` writes a second movement in the same transaction through
   `ServiceWithdrawalRecorder`, which also voids the reservations still standing on that asset and
-  returns them so the screen can list them.
+  returns them so the screen can list them. Both candidate entries are validated together, so a
+  withdrawal cannot land on an asset the ledger already has out of service.
+- The withdrawal carries `pairedWithMovementId` back to its return, and the ids of the
+  reservations it voided. `CorrectMovementUseCase` uses both: correcting the return moves the
+  withdrawal with it, voiding the return voids it, and voiding a withdrawal reinstates the exact
+  claims it cancelled.
 
 ## 6. What happens when a reservation is made
 
@@ -278,7 +284,7 @@ cancelling a reservation. Reads use no transaction.
 | --- | --- | --- |
 | `apps/api/src/**/*.spec.ts` | `npm run test:unit` | The pure rules in isolation: timeline validity and replay, `stateAt` boundaries, certificates judged at an instant, reservation windows, snapshot assembly, request fingerprints, instant parsing, the site clock. |
 | `apps/api/test/e2e` | `npm run test:e2e` | The API over HTTP against a seeded database with a frozen clock: every success and every refusal named in the brief, with the exact messages. |
-| `apps/api/test/invariants` | `npm run test:invariants` | The properties, checked against raw documents rather than the API: one holder, no overlap, no lapsed certificate, no issue while out of service, no duplicate on repeat, as-of equals an independent replay, documents reference each other consistently. |
+| `apps/api/test/invariants` | `npm run test:invariants` | The properties, checked against raw documents rather than the API: one holder, no overlap, no lapsed certificate, no issue while out of service, no duplicate on repeat, as-of equals an independent replay, documents reference each other consistently. The one-holder check counts open holdings straight off the movement documents after every entry, so it fails if a second one is ever planted. |
 | `apps/web/tests` | `npm run test:web` | The screens: the dashboard, a double-clicked issue landing once, a refused issue showing the API's sentence, the as-of view, a reservation clash. The browser runs in a different timezone from the site on purpose. |
 
 The e2e and invariant suites boot the real Nest application on an ephemeral port and re-seed
@@ -295,8 +301,9 @@ some workers the certificate in `apps/api/src/seed/catalogue.ts`.
 
 **Add a movement type.** `packages/shared/src/movements.ts` (`MOVEMENT_TYPES` and its labels),
 then teach `asset-timeline.ts` what it does in `replayTimeline` and `findTimelineViolation`, and
-decide which track it belongs to (`HOLDING_MOVEMENT_TYPES` or `SERVICE_MOVEMENT_TYPES`, which the
-as-of aggregation uses). Then write the use case.
+decide which track it belongs to by adding it to `HOLDING_MOVEMENT_TYPES` or leaving it on the
+service track (`trackOf`). The track decides both the as-of aggregation and which entry the
+append guard compares against. Then write the use case.
 
 **Change a reservation rule.** `packages/shared/src/reservations.ts` for the numbers,
 `apps/api/src/modules/reservations/domain/reservation-window.ts` for the logic and the sentence.
