@@ -1,0 +1,48 @@
+{
+  "name": "@equipment-ledger/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS API for the equipment ledger.",
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "seed": "ts-node --transpile-only src/seed/main.ts",
+    "lint": "eslint src test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --config jest.config.ts && jest --config test/jest-e2e.config.ts --runInBand && jest --config test/jest-invariants.config.ts --runInBand",
+    "test:unit": "jest --config jest.config.ts",
+    "test:e2e": "jest --config test/jest-e2e.config.ts --runInBand",
+    "test:invariants": "jest --config test/jest-invariants.config.ts --runInBand"
+  },
+  "dependencies": {
+    "@equipment-ledger/shared": "*",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/platform-express": "^11.1.6",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "dotenv": "^16.5.0",
+    "mongoose": "^8.18.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/testing": "^11.1.6",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.0",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^29.7.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.24.0"
+  }
+}

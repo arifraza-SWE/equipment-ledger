@@ -1,0 +1,32 @@
+{
+  "name": "equipment-ledger",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Equipment ledger for a construction site store: issues, returns, reservations and an as-of reconstruction of the store at any instant.",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/shared",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run build -w @equipment-ledger/shared && concurrently -n api,web -c blue,magenta \"npm run start:dev -w @equipment-ledger/api\" \"npm run dev -w @equipment-ledger/web\"",
+    "build": "npm run build -w @equipment-ledger/shared && npm run build -w @equipment-ledger/api && npm run build -w @equipment-ledger/web",
+    "seed": "npm run build -w @equipment-ledger/shared && npm run seed -w @equipment-ledger/api",
+    "typecheck": "npm run build -w @equipment-ledger/shared && npm run typecheck -w @equipment-ledger/api && npm run typecheck -w @equipment-ledger/web",
+    "lint": "npm run lint -w @equipment-ledger/shared && npm run lint -w @equipment-ledger/api && npm run lint -w @equipment-ledger/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build -w @equipment-ledger/shared && npm run test -w @equipment-ledger/api",
+    "test:unit": "npm run build -w @equipment-ledger/shared && npm run test:unit -w @equipment-ledger/api",
+    "test:e2e": "npm run build -w @equipment-ledger/shared && npm run test:e2e -w @equipment-ledger/api",
+    "test:invariants": "npm run build -w @equipment-ledger/shared && npm run test:invariants -w @equipment-ledger/api",
+    "test:web": "npm run test:e2e -w @equipment-ledger/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3"
+  }
+}

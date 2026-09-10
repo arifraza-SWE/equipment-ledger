@@ -1,0 +1,23 @@
+{
+  "name": "@equipment-ledger/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wire contract shared by the API and the web app: domain vocabulary, request and response shapes, business rule constants.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.24.0"
+  }
+}
