@@ -17,11 +17,13 @@ npm run test:e2e
 ```
 
 Playwright starts the Next.js dev server on port 3000 unless one is already listening there. If
-3000 is taken, run on another port and tell the API to allow it:
+3000 is taken on your machine, run both the app and the tests on another port and tell the API to
+allow it:
 
 ```bash
 WEB_ORIGIN=http://localhost:3000,http://localhost:3100   # in .env, before starting the API
-WEB_PORT=3100 npm run test:e2e
+PORT=3100 npm run dev                                    # the app
+WEB_PORT=3100 npm run test:e2e                           # the tests
 ```
 
 `issue-idempotency.spec.ts` issues DRL-003, which changes the store. Run `npm run seed` at the

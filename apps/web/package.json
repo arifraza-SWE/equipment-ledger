@@ -4,9 +4,9 @@
   "private": true,
   "description": "Next.js front end for the equipment ledger.",
   "scripts": {
-    "dev": "next dev -p 3100",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3100",
+    "start": "next start",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:e2e": "playwright test"

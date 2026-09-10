@@ -25,7 +25,9 @@ npm run dev                 # API on http://localhost:4000, web on http://localh
 ```
 
 The first `docker compose up` initiates the replica set through the container's healthcheck,
-so give it a few seconds before seeding. `npm run seed` builds the shared package, wipes the
+so give it a few seconds before seeding. If port 3000 is already taken on your machine, start the
+web app on another one with `PORT=3100 npm run dev` and add that origin to `WEB_ORIGIN` in `.env`,
+or the browser will be blocked by CORS the first time a form is submitted. `npm run seed` builds the shared package, wipes the
 `equipment_ledger` database and writes the fixed dataset described under "Seed". `npm run dev`
 starts both sides with hot reload.
 
