@@ -1,0 +1,48 @@
+.button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.primary {
+  background: var(--ink);
+  color: var(--card);
+}
+
+.primary:not(:disabled):hover {
+  background: #000;
+}
+
+.secondary {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--hairline-strong);
+}
+
+.secondary:not(:disabled):hover {
+  border-color: var(--ink);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: transparent;
+  padding: 4px 6px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.quiet:not(:disabled):hover {
+  color: var(--ink);
+}

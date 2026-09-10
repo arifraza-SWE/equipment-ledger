@@ -33,11 +33,18 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const idempotencyKey = readIdempotencyKey(request);
     const requestFingerprint = fingerprintRequest(request.method, request.path, request.body);
 
-    const claim = await this.idempotency.claim(idempotencyKey, requestFingerprint, this.clock.now());
+    const claim = await this.idempotency.claim(
+      idempotencyKey,
+      requestFingerprint,
+      this.clock.now(),
+    );
     if (claim.kind === 'replay') {
       response.setHeader(IDEMPOTENCY_REPLAYED_HEADER, 'true');
       if (claim.response.statusCode >= 400) {
-        throw new HttpException(claim.response.body as Record<string, unknown>, claim.response.statusCode);
+        throw new HttpException(
+          claim.response.body as Record<string, unknown>,
+          claim.response.statusCode,
+        );
       }
       response.status(claim.response.statusCode);
       return of(claim.response.body);

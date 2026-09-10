@@ -113,13 +113,31 @@ export function buildScenarios(clock: SeedClock): SeedScenarios {
     loan('GRN-002 twenty days ago', 'GRN-002', 'WKR-010', 'KPR-01', clock, -20, '07:30', '16:00'),
     // Reservation collected on time.
     {
-      ...loan('HARN-005 against reservation', 'HARN-005', 'WKR-001', 'KPR-01', clock, -7, '07:55', '15:30'),
+      ...loan(
+        'HARN-005 against reservation',
+        'HARN-005',
+        'WKR-001',
+        'KPR-01',
+        clock,
+        -7,
+        '07:55',
+        '15:30',
+      ),
       dueAt: clock.at(-7, '16:00'),
       reservationLabel: 'HARN-005 reservation',
     },
     // Returned damaged and withdrawn at the same instant.
     {
-      ...loan('SAW-003 returned damaged', 'SAW-003', 'WKR-010', 'KPR-03', clock, -2, '07:30', '15:45'),
+      ...loan(
+        'SAW-003 returned damaged',
+        'SAW-003',
+        'WKR-010',
+        'KPR-03',
+        clock,
+        -2,
+        '07:30',
+        '15:45',
+      ),
       returnNote: 'Blade guard cracked',
       withdrawnOnReturn: 'Blade guard cracked, sent for repair',
     },
@@ -141,7 +159,16 @@ export function buildScenarios(clock: SeedClock): SeedScenarios {
     },
     // Returned by a colleague on the holder's behalf.
     {
-      ...loan('TWR-002 returned by colleague', 'TWR-002', 'WKR-012', 'KPR-01', clock, -6, '07:50', '16:35'),
+      ...loan(
+        'TWR-002 returned by colleague',
+        'TWR-002',
+        'WKR-012',
+        'KPR-01',
+        clock,
+        -6,
+        '07:50',
+        '16:35',
+      ),
       returnedByWorkerId: 'WKR-001',
       returnNote: 'Handed back by Amira; Ewan left site early',
     },
@@ -177,7 +204,11 @@ export function buildScenarios(clock: SeedClock): SeedScenarios {
       startsAt: clock.at(-5, '08:00'),
       endsAt: clock.at(-5, '12:00'),
       createdAt: clock.at(-8, '15:00'),
-      outcome: { kind: 'voided', closedAt: clock.at(-6, '10:15'), reason: OUT_OF_SERVICE_VOID_REASON },
+      outcome: {
+        kind: 'voided',
+        closedAt: clock.at(-6, '10:15'),
+        reason: OUT_OF_SERVICE_VOID_REASON,
+      },
     },
     {
       label: 'LAD-002 cancelled',

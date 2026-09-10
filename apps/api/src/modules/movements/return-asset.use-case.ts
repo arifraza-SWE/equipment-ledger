@@ -11,7 +11,11 @@ import {
   sortTimeline,
   type TimelineEntry,
 } from '../ledger/domain/asset-timeline';
-import { MovementsRepository, toMovement, toTimelineEntry } from '../ledger/persistence/movements.repository';
+import {
+  MovementsRepository,
+  toMovement,
+  toTimelineEntry,
+} from '../ledger/persistence/movements.repository';
 import { StoreSnapshotService } from '../ledger/store-snapshot.service';
 import { LedgerParties } from './ledger-parties';
 import { ServiceWithdrawalRecorder } from './service-withdrawal.recorder';
@@ -45,11 +49,22 @@ export class ReturnAssetUseCase {
       const returner = await this.parties.requireWorker(request.returnedByWorkerId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 
-      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(toTimelineEntry);
-      assertEntryCanBeAppended({ timeline, effectiveAt, assetId: asset._id, registeredAt: asset.registeredAt, now });
+      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
+        toTimelineEntry,
+      );
+      assertEntryCanBeAppended({
+        timeline,
+        effectiveAt,
+        assetId: asset._id,
+        registeredAt: asset.registeredAt,
+        now,
+      });
 
       const holding = replayTimeline(timeline).holding;
-      const workerName = await this.parties.workerNameLookup([holding?.workerId ?? null, returner._id]);
+      const workerName = await this.parties.workerNameLookup([
+        holding?.workerId ?? null,
+        returner._id,
+      ]);
 
       const candidate: TimelineEntry = {
         movementId: PENDING_ENTRY_ID,
@@ -72,7 +87,11 @@ export class ReturnAssetUseCase {
         throw new RuleViolationError(
           'returner_mismatch',
           `${asset._id} is held by ${workerName(holding.workerId)}, not ${workerName(returner._id)}. If ${returner.fullName} is handing it back on their behalf, confirm the return from a different worker.`,
-          { assetId: asset._id, holderWorkerId: holding.workerId, returnedByWorkerId: returner._id },
+          {
+            assetId: asset._id,
+            holderWorkerId: holding.workerId,
+            returnedByWorkerId: returner._id,
+          },
         );
       }
 

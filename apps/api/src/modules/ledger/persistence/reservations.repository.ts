@@ -28,7 +28,9 @@ const WINDOW_CLAIMING_STATUSES: ReservationStatus[] = ['active', 'fulfilled'];
 
 @Injectable()
 export class ReservationsRepository {
-  constructor(@InjectModel(ReservationRecord.name) private readonly reservations: Model<ReservationRecord>) {}
+  constructor(
+    @InjectModel(ReservationRecord.name) private readonly reservations: Model<ReservationRecord>,
+  ) {}
 
   async insert(newReservation: NewReservation, session: ClientSession): Promise<ReservationRecord> {
     const [created] = await this.reservations.create(
@@ -49,8 +51,14 @@ export class ReservationsRepository {
     return created.toObject();
   }
 
-  async findById(reservationId: string, session?: ClientSession): Promise<ReservationRecord | null> {
-    return this.reservations.findById(reservationId).session(session ?? null).lean();
+  async findById(
+    reservationId: string,
+    session?: ClientSession,
+  ): Promise<ReservationRecord | null> {
+    return this.reservations
+      .findById(reservationId)
+      .session(session ?? null)
+      .lean();
   }
 
   async findOverlapping(
@@ -88,7 +96,11 @@ export class ReservationsRepository {
       .lean();
   }
 
-  async findActiveEndingAfter(assetId: string, instant: Date, session: ClientSession): Promise<ReservationRecord[]> {
+  async findActiveEndingAfter(
+    assetId: string,
+    instant: Date,
+    session: ClientSession,
+  ): Promise<ReservationRecord[]> {
     return this.reservations
       .find({ assetId, status: 'active', endsAt: { $gt: instant } })
       .sort({ startsAt: 1 })
@@ -140,7 +152,14 @@ export class ReservationsRepository {
   ): Promise<void> {
     const outcome = await this.reservations.updateOne(
       { _id: reservationId, status: 'active' },
-      { $set: { status: 'fulfilled', fulfilledByMovementId: movementId, closedAt, closedReason: 'collected' } },
+      {
+        $set: {
+          status: 'fulfilled',
+          fulfilledByMovementId: movementId,
+          closedAt,
+          closedReason: 'collected',
+        },
+      },
       { session },
     );
     if (outcome.matchedCount === 0) {
@@ -155,7 +174,9 @@ export class ReservationsRepository {
   async reopen(reservationId: Types.ObjectId, session: ClientSession): Promise<void> {
     await this.reservations.updateOne(
       { _id: reservationId, status: 'fulfilled' },
-      { $set: { status: 'active', fulfilledByMovementId: null, closedAt: null, closedReason: null } },
+      {
+        $set: { status: 'active', fulfilledByMovementId: null, closedAt: null, closedReason: null },
+      },
       { session },
     );
   }
@@ -208,7 +229,9 @@ export function toReservation(record: ReservationRecord, now: Date): Reservation
     standing: standingAt(record, now),
     note: record.note,
     createdAt: record.createdAt.toISOString(),
-    fulfilledByMovementId: record.fulfilledByMovementId ? record.fulfilledByMovementId.toHexString() : null,
+    fulfilledByMovementId: record.fulfilledByMovementId
+      ? record.fulfilledByMovementId.toHexString()
+      : null,
     closedAt: record.closedAt ? record.closedAt.toISOString() : null,
     closedReason: record.closedReason,
   };

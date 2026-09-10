@@ -1,0 +1,46 @@
+.notice {
+  border: 1px solid var(--hairline);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  background: var(--card);
+}
+
+.title {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.body {
+  line-height: 1.5;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.error {
+  border-color: var(--error-border);
+  border-left-color: var(--error-fg);
+  background: var(--error-bg);
+  color: var(--error-fg);
+}
+
+.success {
+  border-left-color: var(--status-in-store-fg);
+}
+
+.info {
+  border-left-color: var(--ink-soft);
+}
+
+.warning {
+  border-left-color: var(--status-issued-fg);
+  background: var(--status-issued-bg);
+  color: var(--status-issued-fg);
+}

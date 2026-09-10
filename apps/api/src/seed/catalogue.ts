@@ -12,7 +12,11 @@ export interface SeedWorker {
   workerId: string;
   fullName: string;
   trade: string;
-  certifications: Array<{ type: CertificationType; issuedDayOffset: number; expiresDayOffset: number }>;
+  certifications: Array<{
+    type: CertificationType;
+    issuedDayOffset: number;
+    expiresDayOffset: number;
+  }>;
 }
 
 interface AssetRange {
@@ -29,7 +33,11 @@ const ASSET_RANGES: AssetRange[] = [
     count: 14,
     kind: 'harness',
     requiredCertification: 'working_at_height',
-    models: ['Petzl Avao Bod full-body harness', 'Honeywell Titan 2-point harness', 'Kratos FA 10 103 harness'],
+    models: [
+      'Petzl Avao Bod full-body harness',
+      'Honeywell Titan 2-point harness',
+      'Kratos FA 10 103 harness',
+    ],
   },
   {
     prefix: 'GAS',
@@ -43,7 +51,11 @@ const ASSET_RANGES: AssetRange[] = [
     count: 10,
     kind: 'cordless_drill',
     requiredCertification: null,
-    models: ['Makita DHP486 18V combi drill', 'DeWalt DCD996 18V combi drill', 'Hilti TE 6-A22 rotary hammer'],
+    models: [
+      'Makita DHP486 18V combi drill',
+      'DeWalt DCD996 18V combi drill',
+      'Hilti TE 6-A22 rotary hammer',
+    ],
   },
   {
     prefix: 'GRN',
@@ -57,7 +69,11 @@ const ASSET_RANGES: AssetRange[] = [
     count: 8,
     kind: 'ladder',
     requiredCertification: null,
-    models: ['Werner 6-tread platform step', 'Lyte 3-section extension ladder', 'Zarges 8-tread step'],
+    models: [
+      'Werner 6-tread platform step',
+      'Lyte 3-section extension ladder',
+      'Zarges 8-tread step',
+    ],
   },
   {
     prefix: 'LVL',
@@ -168,7 +184,12 @@ export const WORKERS: SeedWorker[] = [
     trade: 'Groundworker',
     certifications: [{ type: 'abrasive_wheels', issuedDayOffset: -320, expiresDayOffset: 410 }],
   },
-  { workerId: 'WKR-011', fullName: 'Grace Whitfield', trade: 'Setting-out engineer', certifications: [] },
+  {
+    workerId: 'WKR-011',
+    fullName: 'Grace Whitfield',
+    trade: 'Setting-out engineer',
+    certifications: [],
+  },
   {
     workerId: 'WKR-012',
     fullName: 'Ewan MacLeod',

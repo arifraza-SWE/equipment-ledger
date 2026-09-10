@@ -1,0 +1,140 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 24px;
+  min-height: 52px;
+  background: var(--card);
+  border-bottom: 1px solid var(--hairline);
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.brandName {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.brandName:hover {
+  text-decoration: underline;
+}
+
+.brandSite {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.nav {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  align-self: stretch;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  min-height: 52px;
+}
+
+.navLink:hover {
+  color: var(--ink);
+}
+
+.navLink[aria-current='page'] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  font-weight: 500;
+}
+
+.keeper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.keeperLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.keeperSelect {
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  min-width: 180px;
+}
+
+.banner {
+  padding: 10px 24px;
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border-bottom: 1px solid var(--error-border);
+  font-size: 13px;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.footer {
+  display: flex;
+  gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 12px;
+  color: var(--ink-muted);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .header {
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .navLink {
+    min-height: 40px;
+    padding: 0 8px;
+  }
+
+  .keeper {
+    margin-left: 0;
+    width: 100%;
+    padding-bottom: 12px;
+  }
+
+  .keeperSelect {
+    flex: 1;
+  }
+
+  .main {
+    padding: 16px;
+  }
+}

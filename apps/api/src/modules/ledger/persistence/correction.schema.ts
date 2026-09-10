@@ -1,5 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CORRECTABLE_FIELDS, CORRECTION_KINDS, type CorrectableField, type CorrectionKind } from '@equipment-ledger/shared';
+import {
+  CORRECTABLE_FIELDS,
+  CORRECTION_KINDS,
+  type CorrectableField,
+  type CorrectionKind,
+} from '@equipment-ledger/shared';
 import { type HydratedDocument, Types } from 'mongoose';
 
 @Schema({ _id: false })

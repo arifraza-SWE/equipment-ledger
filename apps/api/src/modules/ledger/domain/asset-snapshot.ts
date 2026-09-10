@@ -21,7 +21,8 @@ export interface AssetSnapshotInput {
 export function assembleAssetSnapshot(input: AssetSnapshotInput): AssetSnapshot {
   const holding = input.holding ? describeHolding(input.holding, input.workerNames) : null;
   const overdue = Boolean(input.holding?.dueAt && input.holding.dueAt < input.instant);
-  const currentReservation = input.standingReservations.find((reservation) => reservation.standing === 'current') ?? null;
+  const currentReservation =
+    input.standingReservations.find((reservation) => reservation.standing === 'current') ?? null;
   const nextReservation =
     input.standingReservations
       .filter((reservation) => reservation.standing === 'upcoming')
@@ -29,7 +30,12 @@ export function assembleAssetSnapshot(input: AssetSnapshotInput): AssetSnapshot 
 
   return {
     asset: input.asset,
-    status: deriveAssetStatus({ holding, overdue, serviceStatus: input.serviceStatus, currentReservation }),
+    status: deriveAssetStatus({
+      holding,
+      overdue,
+      serviceStatus: input.serviceStatus,
+      currentReservation,
+    }),
     serviceStatus: input.serviceStatus,
     holding,
     overdue,
@@ -70,7 +76,10 @@ export function countTotals(snapshots: readonly AssetSnapshot[]): StoreSnapshotT
   );
 }
 
-function describeHolding(holding: TimelineEntry, workerNames: ReadonlyMap<string, string>): AssetHolding {
+function describeHolding(
+  holding: TimelineEntry,
+  workerNames: ReadonlyMap<string, string>,
+): AssetHolding {
   const workerId = holding.workerId ?? '';
   return {
     movementId: holding.movementId,

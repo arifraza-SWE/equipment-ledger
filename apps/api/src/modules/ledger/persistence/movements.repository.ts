@@ -47,7 +47,9 @@ interface LatestEntryRow {
 
 @Injectable()
 export class MovementsRepository {
-  constructor(@InjectModel(MovementRecord.name) private readonly movements: Model<MovementRecord>) {}
+  constructor(
+    @InjectModel(MovementRecord.name) private readonly movements: Model<MovementRecord>,
+  ) {}
 
   async insert(newMovement: NewMovement, session: ClientSession): Promise<MovementRecord> {
     const [created] = await this.movements.create(
@@ -61,7 +63,10 @@ export class MovementsRepository {
   }
 
   async findById(movementId: string, session?: ClientSession): Promise<MovementRecord | null> {
-    return this.movements.findById(movementId).session(session ?? null).lean();
+    return this.movements
+      .findById(movementId)
+      .session(session ?? null)
+      .lean();
   }
 
   async findByIds(movementIds: readonly Types.ObjectId[]): Promise<Map<string, MovementRecord>> {
@@ -81,7 +86,10 @@ export class MovementsRepository {
   }
 
   async findAllForAsset(assetId: string): Promise<MovementRecord[]> {
-    return this.movements.find({ assetId }).sort({ effectiveAt: 1, sequence: 1, recordedAt: 1 }).lean();
+    return this.movements
+      .find({ assetId })
+      .sort({ effectiveAt: 1, sequence: 1, recordedAt: 1 })
+      .lean();
   }
 
   async findRecentForWorker(workerId: string, limit: number): Promise<MovementRecord[]> {
@@ -145,7 +153,11 @@ export class MovementsRepository {
     return byAsset;
   }
 
-  async list(filter: MovementListFilter, cursor: string | null, limit: number): Promise<MovementPage> {
+  async list(
+    filter: MovementListFilter,
+    cursor: string | null,
+    limit: number,
+  ): Promise<MovementPage> {
     const query: FilterQuery<MovementRecord> = {};
     if (filter.assetId) {
       query.assetId = filter.assetId;
@@ -177,7 +189,11 @@ export class MovementsRepository {
     return { records: page, nextCursor: hasMore && last ? encodeCursor(last) : null };
   }
 
-  async insertMany(records: Array<NewMovement & { _id: Types.ObjectId; supersededByCorrectionId: Types.ObjectId | null }>): Promise<void> {
+  async insertMany(
+    records: Array<
+      NewMovement & { _id: Types.ObjectId; supersededByCorrectionId: Types.ObjectId | null }
+    >,
+  ): Promise<void> {
     if (records.length > 0) {
       await this.movements.insertMany(records);
     }
@@ -204,7 +220,9 @@ export function toMovement(record: MovementRecord): Movement {
     supersededByCorrectionId: record.supersededByCorrectionId
       ? record.supersededByCorrectionId.toHexString()
       : null,
-    createdByCorrectionId: record.createdByCorrectionId ? record.createdByCorrectionId.toHexString() : null,
+    createdByCorrectionId: record.createdByCorrectionId
+      ? record.createdByCorrectionId.toHexString()
+      : null,
   };
 }
 
@@ -224,13 +242,19 @@ function encodeCursor(record: MovementRecord): string {
   return `${record.recordedAt.getTime()}_${record._id.toHexString()}`;
 }
 
-function decodeCursor(cursor: string | null): { recordedAt: Date; movementId: Types.ObjectId } | null {
+function decodeCursor(
+  cursor: string | null,
+): { recordedAt: Date; movementId: Types.ObjectId } | null {
   if (!cursor) {
     return null;
   }
   const [recordedAtPart, movementIdPart] = cursor.split('_');
   const recordedAtMillis = Number(recordedAtPart);
-  if (!Number.isFinite(recordedAtMillis) || !movementIdPart || !Types.ObjectId.isValid(movementIdPart)) {
+  if (
+    !Number.isFinite(recordedAtMillis) ||
+    !movementIdPart ||
+    !Types.ObjectId.isValid(movementIdPart)
+  ) {
     return null;
   }
   return { recordedAt: new Date(recordedAtMillis), movementId: new Types.ObjectId(movementIdPart) };

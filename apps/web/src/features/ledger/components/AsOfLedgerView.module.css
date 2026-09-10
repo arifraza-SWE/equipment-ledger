@@ -1,0 +1,66 @@
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.pickerField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pickerField label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pickerRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pickerRow input {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 9px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  min-width: 240px;
+}
+
+.pickerProblem {
+  margin: 0;
+  font-size: 12px;
+  color: var(--error-fg);
+}
+
+.quickPicks {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.echo {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.echoIso {
+  color: var(--ink-muted);
+  margin-left: 8px;
+}

@@ -21,7 +21,10 @@ export class WorkersRepository {
   }
 
   async findById(workerId: string, session?: ClientSession): Promise<WorkerRecord | null> {
-    return this.workers.findById(workerId).session(session ?? null).lean();
+    return this.workers
+      .findById(workerId)
+      .session(session ?? null)
+      .lean();
   }
 
   async findByIds(workerIds: readonly string[]): Promise<Map<string, WorkerRecord>> {

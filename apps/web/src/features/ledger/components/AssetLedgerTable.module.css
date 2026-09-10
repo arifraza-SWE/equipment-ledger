@@ -1,0 +1,81 @@
+.filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.filter select,
+.filter input {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  min-width: 150px;
+}
+
+.searchFilter {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+}
+
+.count {
+  margin: 0 0 7px auto;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.statusCell {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.overdueRow th:first-child {
+  box-shadow: inset 3px 0 0 var(--status-overdue-fg);
+}
+
+.overdueDue {
+  color: var(--status-overdue-fg);
+}
+
+.overdueFlag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+.reservationCell {
+  font-size: 12px;
+}
+
+.actionsCell {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .count {
+    margin-left: 0;
+    width: 100%;
+  }
+}

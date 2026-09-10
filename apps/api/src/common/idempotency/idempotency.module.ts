@@ -6,7 +6,9 @@ import { IdempotencyService } from './idempotency.service';
 
 @Global()
 @Module({
-  imports: [MongooseModule.forFeature([{ name: IdempotencyRecord.name, schema: IdempotencyRecordSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: IdempotencyRecord.name, schema: IdempotencyRecordSchema }]),
+  ],
   providers: [IdempotencyService, IdempotencyInterceptor],
   exports: [IdempotencyService, IdempotencyInterceptor],
 })

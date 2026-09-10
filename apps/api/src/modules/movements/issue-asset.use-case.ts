@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ISSUE_RULES, type IssueAssetRequest, type MovementResult } from '@equipment-ledger/shared';
 import { type ClientSession, Types } from 'mongoose';
-import { NotFoundError, RuleViolationError, StateConflictError } from '../../common/errors/domain-error';
+import {
+  NotFoundError,
+  RuleViolationError,
+  StateConflictError,
+} from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
 import { addHours, describeInstant } from '../../common/time/instant';
 import { requireInstant } from '../../common/time/require-instant';
@@ -15,7 +19,11 @@ import {
   type TimelineEntry,
 } from '../ledger/domain/asset-timeline';
 import { type MovementRecord } from '../ledger/persistence/movement.schema';
-import { MovementsRepository, toMovement, toTimelineEntry } from '../ledger/persistence/movements.repository';
+import {
+  MovementsRepository,
+  toMovement,
+  toTimelineEntry,
+} from '../ledger/persistence/movements.repository';
 import { type ReservationRecord } from '../ledger/persistence/reservation.schema';
 import { ReservationsRepository } from '../ledger/persistence/reservations.repository';
 import { StoreSnapshotService } from '../ledger/store-snapshot.service';
@@ -52,13 +60,33 @@ export class IssueAssetUseCase {
       const worker = await this.parties.requireWorker(request.workerId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 
-      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(toTimelineEntry);
-      assertEntryCanBeAppended({ timeline, effectiveAt, assetId: asset._id, registeredAt: asset.registeredAt, now });
+      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
+        toTimelineEntry,
+      );
+      assertEntryCanBeAppended({
+        timeline,
+        effectiveAt,
+        assetId: asset._id,
+        registeredAt: asset.registeredAt,
+        now,
+      });
 
-      const reservation = await this.resolveReservation(asset, worker, effectiveAt, request.reservationId ?? null, session);
-      const dueAt = requestedDueAt ?? reservation?.endsAt ?? addHours(effectiveAt, ISSUE_RULES.defaultLoanHours);
+      const reservation = await this.resolveReservation(
+        asset,
+        worker,
+        effectiveAt,
+        request.reservationId ?? null,
+        session,
+      );
+      const dueAt =
+        requestedDueAt ??
+        reservation?.endsAt ??
+        addHours(effectiveAt, ISSUE_RULES.defaultLoanHours);
       if (dueAt <= effectiveAt) {
-        throw new RuleViolationError('validation_failed', 'The due time must be after the issue time.');
+        throw new RuleViolationError(
+          'validation_failed',
+          'The due time must be after the issue time.',
+        );
       }
 
       const candidate: TimelineEntry = {
@@ -77,7 +105,11 @@ export class IssueAssetUseCase {
         throw timelineViolationToError(violation, { assetId: asset._id, workerName });
       }
 
-      const certification = checkCertification(worker.certifications, asset.requiredCertification, effectiveAt);
+      const certification = checkCertification(
+        worker.certifications,
+        asset.requiredCertification,
+        effectiveAt,
+      );
       if (!certification.qualified && asset.requiredCertification) {
         throw certificationRefusal(certification, {
           workerId: worker._id,
@@ -123,7 +155,13 @@ export class IssueAssetUseCase {
     session: ClientSession,
   ): Promise<ReservationRecord | null> {
     if (requestedReservationId) {
-      return this.requireMatchingReservation(asset, worker, effectiveAt, requestedReservationId, session);
+      return this.requireMatchingReservation(
+        asset,
+        worker,
+        effectiveAt,
+        requestedReservationId,
+        session,
+      );
     }
 
     const covering = await this.reservations.findActiveCovering(
@@ -142,7 +180,11 @@ export class IssueAssetUseCase {
       throw new StateConflictError(
         'asset_reserved_by_other',
         `${asset._id} is reserved by ${workerName(someoneElses.workerId)} from ${describeInstant(someoneElses.startsAt)} to ${describeInstant(someoneElses.endsAt)}. It can only be issued to them during that window.`,
-        { assetId: asset._id, reservationId: someoneElses._id.toHexString(), reservedForWorkerId: someoneElses.workerId },
+        {
+          assetId: asset._id,
+          reservationId: someoneElses._id.toHexString(),
+          reservedForWorkerId: someoneElses.workerId,
+        },
       );
     }
     return null;
@@ -165,7 +207,11 @@ export class IssueAssetUseCase {
       throw new RuleViolationError(
         'reservation_mismatch',
         `Reservation ${reservationId} is for ${reservation.assetId} and worker ${reservation.workerId}, not ${asset._id} and ${worker._id}.`,
-        { reservationId, reservedAssetId: reservation.assetId, reservedWorkerId: reservation.workerId },
+        {
+          reservationId,
+          reservedAssetId: reservation.assetId,
+          reservedWorkerId: reservation.workerId,
+        },
       );
     }
     if (reservation.status !== 'active') {
@@ -175,12 +221,18 @@ export class IssueAssetUseCase {
         { reservationId, status: reservation.status },
       );
     }
-    const earliestCollection = new Date(reservation.startsAt.getTime() - ISSUE_RULES.earlyCollectionGraceMinutes * 60_000);
+    const earliestCollection = new Date(
+      reservation.startsAt.getTime() - ISSUE_RULES.earlyCollectionGraceMinutes * 60_000,
+    );
     if (effectiveAt < earliestCollection || effectiveAt >= reservation.endsAt) {
       throw new RuleViolationError(
         'reservation_mismatch',
         `Reservation ${reservationId} runs from ${describeInstant(reservation.startsAt)} to ${describeInstant(reservation.endsAt)}; an issue at ${describeInstant(effectiveAt)} falls outside it.`,
-        { reservationId, startsAt: reservation.startsAt.toISOString(), endsAt: reservation.endsAt.toISOString() },
+        {
+          reservationId,
+          startsAt: reservation.startsAt.toISOString(),
+          endsAt: reservation.endsAt.toISOString(),
+        },
       );
     }
     return reservation;

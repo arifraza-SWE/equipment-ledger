@@ -1,5 +1,9 @@
 import { ISSUE_RULES, MOVEMENT_TYPE_LABELS } from '@equipment-ledger/shared';
-import { type DomainError, RuleViolationError, StateConflictError } from '../../common/errors/domain-error';
+import {
+  type DomainError,
+  RuleViolationError,
+  StateConflictError,
+} from '../../common/errors/domain-error';
 import { describeInstant, minutes } from '../../common/time/instant';
 import type { TimelineEntry, TimelineViolation } from '../ledger/domain/asset-timeline';
 
@@ -29,7 +33,11 @@ export function assertEntryCanBeAppended(input: {
     throw new RuleViolationError(
       'timeline_conflict',
       `${assetId} already has a later entry on its ledger (${MOVEMENT_TYPE_LABELS[latest.type].toLowerCase()} at ${describeInstant(latest.effectiveAt)}). A new entry cannot be slotted in before it. If that later entry is wrong, correct it instead.`,
-      { assetId, laterMovementId: latest.movementId, laterEffectiveAt: latest.effectiveAt.toISOString() },
+      {
+        assetId,
+        laterMovementId: latest.movementId,
+        laterEffectiveAt: latest.effectiveAt.toISOString(),
+      },
     );
   }
 }
@@ -44,7 +52,10 @@ export function assertNotInFuture(effectiveAt: Date, now: Date): void {
   }
 }
 
-export function timelineViolationToError(violation: TimelineViolation, names: TimelineNames): DomainError {
+export function timelineViolationToError(
+  violation: TimelineViolation,
+  names: TimelineNames,
+): DomainError {
   const { assetId } = names;
   const at = describeInstant(violation.entry.effectiveAt);
 

@@ -40,7 +40,9 @@ export class LedgerParties {
     return keeper;
   }
 
-  async workerNameLookup(workerIds: ReadonlyArray<string | null>): Promise<(workerId: string | null) => string> {
+  async workerNameLookup(
+    workerIds: ReadonlyArray<string | null>,
+  ): Promise<(workerId: string | null) => string> {
     const presentIds = workerIds.filter((workerId): workerId is string => workerId !== null);
     const records = await this.workers.findByIds(presentIds);
     return (workerId) => {

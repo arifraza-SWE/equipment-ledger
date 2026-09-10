@@ -1,0 +1,41 @@
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.inStore {
+  color: var(--status-in-store-fg);
+  background: var(--status-in-store-bg);
+}
+
+.reserved {
+  color: var(--status-reserved-fg);
+  background: var(--status-reserved-bg);
+}
+
+.issued {
+  color: var(--status-issued-fg);
+  background: var(--status-issued-bg);
+}
+
+.overdue {
+  color: var(--status-overdue-fg);
+  background: var(--status-overdue-bg);
+}
+
+.outOfService {
+  color: var(--status-out-of-service-fg);
+  background: var(--status-out-of-service-bg);
+}
+
+.neutral {
+  color: var(--ink-soft);
+  background: var(--card);
+  border-color: var(--hairline);
+}

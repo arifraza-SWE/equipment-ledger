@@ -64,7 +64,7 @@ function extractValidationMessages(body: unknown): string[] {
   if (typeof body !== 'object' || body === null || !('message' in body)) {
     return [];
   }
-  const message = (body as { message: unknown }).message;
+  const message = body.message;
   if (Array.isArray(message)) {
     return message.filter((entry): entry is string => typeof entry === 'string');
   }

@@ -3,7 +3,10 @@ import type { Reservation } from '@equipment-ledger/shared';
 import { NotFoundError, StateConflictError } from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
 import { TransactionRunner } from '../../database/transaction-runner';
-import { ReservationsRepository, toReservation } from '../ledger/persistence/reservations.repository';
+import {
+  ReservationsRepository,
+  toReservation,
+} from '../ledger/persistence/reservations.repository';
 
 const CANCELLED_BY_KEEPER = 'Cancelled at the hatch';
 
@@ -22,7 +25,13 @@ export class CancelReservationUseCase {
       if (!reservation) {
         throw new NotFoundError(`There is no reservation ${reservationId}.`, { reservationId });
       }
-      const closed = await this.reservations.close(reservation._id, 'cancelled', now, CANCELLED_BY_KEEPER, session);
+      const closed = await this.reservations.close(
+        reservation._id,
+        'cancelled',
+        now,
+        CANCELLED_BY_KEEPER,
+        session,
+      );
       if (!closed) {
         throw new StateConflictError(
           'reservation_not_active',

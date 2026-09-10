@@ -1,0 +1,18 @@
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.certificate {
+  display: inline-block;
+  margin-right: 12px;
+}
+
+.certificate[data-expired='true'] {
+  color: var(--status-overdue-fg);
+}
+
+.warning {
+  color: var(--status-issued-fg);
+}

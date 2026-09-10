@@ -29,7 +29,8 @@ export function checkCertification(
     return { qualified: false, reason: 'missing' };
   }
   const covering = matching.find(
-    (certification) => certification.issuedAt <= issueInstant && issueInstant < certification.expiresAt,
+    (certification) =>
+      certification.issuedAt <= issueInstant && issueInstant < certification.expiresAt,
   );
   if (covering) {
     return { qualified: true };

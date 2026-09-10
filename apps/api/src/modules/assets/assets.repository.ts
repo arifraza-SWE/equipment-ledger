@@ -23,15 +23,25 @@ export class AssetsRepository {
   }
 
   async findRegisteredBy(instant: Date): Promise<AssetRecord[]> {
-    return this.assets.find({ registeredAt: { $lte: instant } }).sort({ _id: 1 }).lean();
+    return this.assets
+      .find({ registeredAt: { $lte: instant } })
+      .sort({ _id: 1 })
+      .lean();
   }
 
   async findById(assetId: string, session?: ClientSession): Promise<AssetRecord | null> {
-    return this.assets.findById(assetId).session(session ?? null).lean();
+    return this.assets
+      .findById(assetId)
+      .session(session ?? null)
+      .lean();
   }
 
   async findEarliestRegistration(): Promise<Date | null> {
-    const earliest = await this.assets.findOne().sort({ registeredAt: 1 }).select({ registeredAt: 1 }).lean();
+    const earliest = await this.assets
+      .findOne()
+      .sort({ registeredAt: 1 })
+      .select({ registeredAt: 1 })
+      .lean();
     return earliest?.registeredAt ?? null;
   }
 
@@ -41,7 +51,11 @@ export class AssetsRepository {
    * number cannot both succeed: one is rejected here (or by MongoDB's write-conflict detection
    * on the document) and is retried against the state the other one left behind.
    */
-  async claimLedgerWrite(assetId: string, expectedVersion: number, session: ClientSession): Promise<number> {
+  async claimLedgerWrite(
+    assetId: string,
+    expectedVersion: number,
+    session: ClientSession,
+  ): Promise<number> {
     const updated = await this.assets
       .findOneAndUpdate(
         { _id: assetId, version: expectedVersion },

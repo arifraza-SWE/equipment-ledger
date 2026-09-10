@@ -26,7 +26,10 @@ export type TimelineViolation =
   | { kind: 'already_in_service'; entry: TimelineEntry };
 
 export const HOLDING_MOVEMENT_TYPES: readonly MovementType[] = ['issue', 'return'];
-export const SERVICE_MOVEMENT_TYPES: readonly MovementType[] = ['out_of_service', 'back_in_service'];
+export const SERVICE_MOVEMENT_TYPES: readonly MovementType[] = [
+  'out_of_service',
+  'back_in_service',
+];
 
 export function compareTimelineOrder(
   left: { effectiveAt: Date; sequence: number },
@@ -36,7 +39,9 @@ export function compareTimelineOrder(
   return byInstant !== 0 ? byInstant : left.sequence - right.sequence;
 }
 
-export function sortTimeline<T extends { effectiveAt: Date; sequence: number }>(entries: readonly T[]): T[] {
+export function sortTimeline<T extends { effectiveAt: Date; sequence: number }>(
+  entries: readonly T[],
+): T[] {
   return [...entries].sort(compareTimelineOrder);
 }
 
@@ -77,7 +82,9 @@ export function stateAt(sortedEntries: readonly TimelineEntry[], instant: Date):
   return replayTimeline(sortedEntries.filter((entry) => entry.effectiveAt <= instant));
 }
 
-export function findTimelineViolation(sortedEntries: readonly TimelineEntry[]): TimelineViolation | null {
+export function findTimelineViolation(
+  sortedEntries: readonly TimelineEntry[],
+): TimelineViolation | null {
   let holding: TimelineEntry | null = null;
   let withdrawal: TimelineEntry | null = null;
   let previousReturn: TimelineEntry | null = null;

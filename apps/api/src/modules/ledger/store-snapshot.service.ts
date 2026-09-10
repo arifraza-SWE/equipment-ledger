@@ -8,7 +8,11 @@ import { assembleAssetSnapshot, countTotals } from './domain/asset-snapshot';
 import { stateAt, type TimelineEntry } from './domain/asset-timeline';
 import { MovementsRepository, toTimelineEntry } from './persistence/movements.repository';
 import { type ReservationRecord } from './persistence/reservation.schema';
-import { ReservationsRepository, standingAt, toReservation } from './persistence/reservations.repository';
+import {
+  ReservationsRepository,
+  standingAt,
+  toReservation,
+} from './persistence/reservations.repository';
 
 @Injectable()
 export class StoreSnapshotService {
@@ -42,8 +46,10 @@ export class StoreSnapshotService {
 
     const snapshots = assetRecords.map((assetRecord) => {
       const latest = latestEntries.get(assetRecord._id);
-      const holdingEntry = latest?.holding && latest.holding.type === 'issue' ? toTimelineEntry(latest.holding) : null;
-      const serviceStatus = latest?.service?.type === 'out_of_service' ? 'out_of_service' : 'in_service';
+      const holdingEntry =
+        latest?.holding && latest.holding.type === 'issue' ? toTimelineEntry(latest.holding) : null;
+      const serviceStatus =
+        latest?.service?.type === 'out_of_service' ? 'out_of_service' : 'in_service';
       return assembleAssetSnapshot({
         asset: toAsset(assetRecord),
         holding: holdingEntry,
@@ -104,7 +110,9 @@ export class StoreSnapshotService {
   }
 }
 
-function groupByAsset(reservations: readonly ReservationRecord[]): Map<string, ReservationRecord[]> {
+function groupByAsset(
+  reservations: readonly ReservationRecord[],
+): Map<string, ReservationRecord[]> {
   const grouped = new Map<string, ReservationRecord[]>();
   for (const reservation of reservations) {
     const forAsset = grouped.get(reservation.assetId) ?? [];

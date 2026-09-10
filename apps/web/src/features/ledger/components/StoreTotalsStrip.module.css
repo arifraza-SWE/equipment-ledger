@@ -1,0 +1,38 @@
+.strip {
+  display: flex;
+  margin: 0 0 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow-x: auto;
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 16px;
+  border-right: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+
+.total:last-child {
+  border-right: 0;
+}
+
+.count {
+  margin: 0;
+  font-family: var(--font-mono), 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.total[data-flagged='true'] .count {
+  color: var(--status-overdue-fg);
+}

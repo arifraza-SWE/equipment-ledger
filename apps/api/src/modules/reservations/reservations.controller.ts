@@ -1,10 +1,24 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Query, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import type { Reservation } from '@equipment-ledger/shared';
 import { IdempotencyInterceptor } from '../../common/idempotency/idempotency.interceptor';
 import { CLOCK, type Clock } from '../../common/time/clock';
 import { requireInstant } from '../../common/time/require-instant';
 import { ObjectIdPipe } from '../../common/validation/object-id.pipe';
-import { ReservationsRepository, toReservation } from '../ledger/persistence/reservations.repository';
+import {
+  ReservationsRepository,
+  toReservation,
+} from '../ledger/persistence/reservations.repository';
 import { CancelReservationUseCase } from './cancel-reservation.use-case';
 import { CreateReservationUseCase } from './create-reservation.use-case';
 import { CreateReservationDto } from './dto/create-reservation.dto';

@@ -11,15 +11,42 @@ const POOLS: LoanPool[] = [
   {
     name: 'general',
     assetIds: [
-      'DRL-002', 'DRL-005', 'DRL-006', 'DRL-008', 'DRL-009', 'DRL-010',
-      'LAD-001', 'LAD-003', 'LAD-004', 'LAD-005', 'LAD-006', 'LAD-007', 'LAD-008',
-      'LVL-003', 'LVL-004', 'RAD-001', 'RAD-002', 'RAD-003', 'RAD-004',
+      'DRL-002',
+      'DRL-005',
+      'DRL-006',
+      'DRL-008',
+      'DRL-009',
+      'DRL-010',
+      'LAD-001',
+      'LAD-003',
+      'LAD-004',
+      'LAD-005',
+      'LAD-006',
+      'LAD-007',
+      'LAD-008',
+      'LVL-003',
+      'LVL-004',
+      'RAD-001',
+      'RAD-002',
+      'RAD-003',
+      'RAD-004',
     ],
     workerIds: ['WKR-006', 'WKR-008', 'WKR-011', 'WKR-002', 'WKR-009', 'WKR-004'],
   },
   {
     name: 'height',
-    assetIds: ['HARN-001', 'HARN-004', 'HARN-006', 'HARN-007', 'HARN-008', 'HARN-009', 'HARN-010', 'HARN-011', 'HARN-012', 'HARN-013'],
+    assetIds: [
+      'HARN-001',
+      'HARN-004',
+      'HARN-006',
+      'HARN-007',
+      'HARN-008',
+      'HARN-009',
+      'HARN-010',
+      'HARN-011',
+      'HARN-012',
+      'HARN-013',
+    ],
     workerIds: ['WKR-001', 'WKR-002', 'WKR-003', 'WKR-005', 'WKR-012'],
   },
   {
@@ -29,7 +56,16 @@ const POOLS: LoanPool[] = [
   },
   {
     name: 'abrasive',
-    assetIds: ['GRN-001', 'GRN-003', 'GRN-004', 'GRN-005', 'GRN-006', 'SAW-001', 'SAW-002', 'SAW-004'],
+    assetIds: [
+      'GRN-001',
+      'GRN-003',
+      'GRN-004',
+      'GRN-005',
+      'GRN-006',
+      'SAW-001',
+      'SAW-002',
+      'SAW-004',
+    ],
     workerIds: ['WKR-007', 'WKR-009', 'WKR-010'],
   },
   {
@@ -69,7 +105,13 @@ export function buildRoutineLoans(clock: SeedClock): SeedLoan[] {
       const assetId = pool.assetIds[(dayIndex * 3 + position) % pool.assetIds.length];
       const workerId = pool.workerIds[(dayIndex + position * 2) % pool.workerIds.length];
       const keeperId = KEEPER_ROTA[(dayIndex + position) % KEEPER_ROTA.length];
-      if (!assetId || !workerId || !keeperId || usedToday.has(assetId) || SCENARIO_ASSETS.has(assetId)) {
+      if (
+        !assetId ||
+        !workerId ||
+        !keeperId ||
+        usedToday.has(assetId) ||
+        SCENARIO_ASSETS.has(assetId)
+      ) {
         continue;
       }
       usedToday.add(assetId);

@@ -16,6 +16,9 @@ function stableStringify(candidate: unknown): string {
   const entries = Object.entries(candidate as Record<string, unknown>)
     .filter(([, propertyValue]) => propertyValue !== undefined)
     .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-    .map(([propertyName, propertyValue]) => `${JSON.stringify(propertyName)}:${stableStringify(propertyValue)}`);
+    .map(
+      ([propertyName, propertyValue]) =>
+        `${JSON.stringify(propertyName)}:${stableStringify(propertyValue)}`,
+    );
   return `{${entries.join(',')}}`;
 }

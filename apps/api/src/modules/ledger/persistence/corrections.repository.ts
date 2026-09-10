@@ -16,12 +16,17 @@ export interface NewCorrection {
 
 @Injectable()
 export class CorrectionsRepository {
-  constructor(@InjectModel(CorrectionRecord.name) private readonly corrections: Model<CorrectionRecord>) {}
+  constructor(
+    @InjectModel(CorrectionRecord.name) private readonly corrections: Model<CorrectionRecord>,
+  ) {}
 
   async insert(newCorrection: NewCorrection, session: ClientSession): Promise<CorrectionRecord> {
-    const [created] = await this.corrections.create([{ ...newCorrection, replacementMovementId: null }], {
-      session,
-    });
+    const [created] = await this.corrections.create(
+      [{ ...newCorrection, replacementMovementId: null }],
+      {
+        session,
+      },
+    );
     if (!created) {
       throw new Error('Correction insert returned no document');
     }
@@ -33,7 +38,11 @@ export class CorrectionsRepository {
     replacementMovementId: Types.ObjectId,
     session: ClientSession,
   ): Promise<void> {
-    await this.corrections.updateOne({ _id: correctionId }, { $set: { replacementMovementId } }, { session });
+    await this.corrections.updateOne(
+      { _id: correctionId },
+      { $set: { replacementMovementId } },
+      { session },
+    );
   }
 
   async findById(correctionId: string): Promise<CorrectionRecord | null> {
@@ -44,7 +53,11 @@ export class CorrectionsRepository {
     return this.corrections.find({ assetId }).sort({ recordedAt: 1 }).lean();
   }
 
-  async insertMany(records: Array<NewCorrection & { _id: Types.ObjectId; replacementMovementId: Types.ObjectId | null }>): Promise<void> {
+  async insertMany(
+    records: Array<
+      NewCorrection & { _id: Types.ObjectId; replacementMovementId: Types.ObjectId | null }
+    >,
+  ): Promise<void> {
     if (records.length > 0) {
       await this.corrections.insertMany(records);
     }
@@ -60,11 +73,17 @@ export function toCorrection(record: CorrectionRecord): Correction {
     correctionId: record._id.toHexString(),
     assetId: record.assetId,
     originalMovementId: record.originalMovementId.toHexString(),
-    replacementMovementId: record.replacementMovementId ? record.replacementMovementId.toHexString() : null,
+    replacementMovementId: record.replacementMovementId
+      ? record.replacementMovementId.toHexString()
+      : null,
     kind: record.kind,
     reason: record.reason,
     keeperId: record.keeperId,
     recordedAt: record.recordedAt.toISOString(),
-    changes: record.changes.map((change) => ({ field: change.field, from: change.from, to: change.to })),
+    changes: record.changes.map((change) => ({
+      field: change.field,
+      from: change.from,
+      to: change.to,
+    })),
   };
 }

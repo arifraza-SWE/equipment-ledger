@@ -33,4 +33,7 @@ export type IdempotencyRecordDocument = HydratedDocument<IdempotencyRecord>;
 
 export const IdempotencyRecordSchema = SchemaFactory.createForClass(IdempotencyRecord);
 
-IdempotencyRecordSchema.index({ claimedAt: 1 }, { expireAfterSeconds: IDEMPOTENCY_RECORD_TTL_SECONDS });
+IdempotencyRecordSchema.index(
+  { claimedAt: 1 },
+  { expireAfterSeconds: IDEMPOTENCY_RECORD_TTL_SECONDS },
+);

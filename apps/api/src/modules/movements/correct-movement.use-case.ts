@@ -5,7 +5,11 @@ import {
   type CorrectMovementRequest,
 } from '@equipment-ledger/shared';
 import type { ClientSession } from 'mongoose';
-import { NotFoundError, RuleViolationError, StateConflictError } from '../../common/errors/domain-error';
+import {
+  NotFoundError,
+  RuleViolationError,
+  StateConflictError,
+} from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
 import { describeInstant } from '../../common/time/instant';
 import { requireInstant } from '../../common/time/require-instant';
@@ -19,7 +23,12 @@ import {
 } from '../ledger/domain/asset-timeline';
 import { CorrectionsRepository, toCorrection } from '../ledger/persistence/corrections.repository';
 import { type MovementRecord } from '../ledger/persistence/movement.schema';
-import { MovementsRepository, type NewMovement, toMovement, toTimelineEntry } from '../ledger/persistence/movements.repository';
+import {
+  MovementsRepository,
+  type NewMovement,
+  toMovement,
+  toTimelineEntry,
+} from '../ledger/persistence/movements.repository';
 import { ReservationsRepository } from '../ledger/persistence/reservations.repository';
 import { StoreSnapshotService } from '../ledger/store-snapshot.service';
 import { checkCertification } from '../workers/domain/certification-check';
@@ -62,8 +71,13 @@ export class CorrectMovementUseCase {
       const asset = await this.parties.requireAsset(original.assetId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 
-      const draft = request.kind === 'amend' ? await this.draftReplacement(original, request, asset, now, session) : null;
-      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(toTimelineEntry);
+      const draft =
+        request.kind === 'amend'
+          ? await this.draftReplacement(original, request, asset, now, session)
+          : null;
+      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
+        toTimelineEntry,
+      );
       const candidateEntry: TimelineEntry | null = draft
         ? {
             movementId: original._id.toHexString(),
@@ -72,12 +86,18 @@ export class CorrectMovementUseCase {
             sequence: original.sequence,
             workerId: draft.fields.workerId,
             dueAt: draft.fields.dueAt,
-            reservationId: draft.fields.reservationId ? draft.fields.reservationId.toHexString() : null,
+            reservationId: draft.fields.reservationId
+              ? draft.fields.reservationId.toHexString()
+              : null,
           }
         : null;
-      const violation = findTimelineViolation(withEntryReplaced(timeline, original._id.toHexString(), candidateEntry));
+      const violation = findTimelineViolation(
+        withEntryReplaced(timeline, original._id.toHexString(), candidateEntry),
+      );
       if (violation) {
-        const workerName = await this.parties.workerNameLookup(timeline.map((entry) => entry.workerId));
+        const workerName = await this.parties.workerNameLookup(
+          timeline.map((entry) => entry.workerId),
+        );
         const underlying = timelineViolationToError(violation, { assetId: asset._id, workerName });
         throw new RuleViolationError(
           'correction_invalid',
@@ -103,7 +123,12 @@ export class CorrectMovementUseCase {
       let replacement: MovementRecord | null = null;
       if (draft) {
         replacement = await this.movements.insert(
-          { ...draft.fields, recordedAt: now, sequence: original.sequence, createdByCorrectionId: correction._id },
+          {
+            ...draft.fields,
+            recordedAt: now,
+            sequence: original.sequence,
+            createdByCorrectionId: correction._id,
+          },
           session,
         );
         await this.corrections.attachReplacement(correction._id, replacement._id, session);
@@ -159,14 +184,21 @@ export class CorrectMovementUseCase {
         );
       }
       if (effectiveAt.getTime() !== original.effectiveAt.getTime()) {
-        changes.push({ field: 'effectiveAt', from: original.effectiveAt.toISOString(), to: effectiveAt.toISOString() });
+        changes.push({
+          field: 'effectiveAt',
+          from: original.effectiveAt.toISOString(),
+          to: effectiveAt.toISOString(),
+        });
         fields.effectiveAt = effectiveAt;
       }
     }
 
     if (request.workerId !== undefined) {
       if (original.type !== 'issue') {
-        throw new RuleViolationError('correction_invalid', 'Only an issue names the worker who received the asset; on a return, correct returnedByWorkerId instead.');
+        throw new RuleViolationError(
+          'correction_invalid',
+          'Only an issue names the worker who received the asset; on a return, correct returnedByWorkerId instead.',
+        );
       }
       if (request.workerId !== original.workerId) {
         await this.parties.requireWorker(request.workerId, session);
@@ -177,11 +209,18 @@ export class CorrectMovementUseCase {
 
     if (request.returnedByWorkerId !== undefined) {
       if (original.type !== 'return') {
-        throw new RuleViolationError('correction_invalid', 'Only a return records who handed the asset back.');
+        throw new RuleViolationError(
+          'correction_invalid',
+          'Only a return records who handed the asset back.',
+        );
       }
       if (request.returnedByWorkerId !== original.returnedByWorkerId) {
         await this.parties.requireWorker(request.returnedByWorkerId, session);
-        changes.push({ field: 'returnedByWorkerId', from: original.returnedByWorkerId, to: request.returnedByWorkerId });
+        changes.push({
+          field: 'returnedByWorkerId',
+          from: original.returnedByWorkerId,
+          to: request.returnedByWorkerId,
+        });
         fields.returnedByWorkerId = request.returnedByWorkerId;
       }
     }
@@ -192,7 +231,11 @@ export class CorrectMovementUseCase {
       }
       const dueAt = request.dueAt === null ? null : requireInstant(request.dueAt, 'dueAt');
       if (dueAt?.getTime() !== original.dueAt?.getTime()) {
-        changes.push({ field: 'dueAt', from: original.dueAt?.toISOString() ?? null, to: dueAt?.toISOString() ?? null });
+        changes.push({
+          field: 'dueAt',
+          from: original.dueAt?.toISOString() ?? null,
+          to: dueAt?.toISOString() ?? null,
+        });
         fields.dueAt = dueAt;
       }
     }
@@ -203,14 +246,24 @@ export class CorrectMovementUseCase {
     }
 
     if (changes.length === 0) {
-      throw new RuleViolationError('correction_invalid', 'Nothing would change. A correction has to alter at least one field, or void the movement.');
+      throw new RuleViolationError(
+        'correction_invalid',
+        'Nothing would change. A correction has to alter at least one field, or void the movement.',
+      );
     }
     if (fields.type === 'issue' && fields.dueAt && fields.dueAt <= fields.effectiveAt) {
-      throw new RuleViolationError('correction_invalid', 'The due time must be after the issue time.');
+      throw new RuleViolationError(
+        'correction_invalid',
+        'The due time must be after the issue time.',
+      );
     }
     if (fields.type === 'issue' && fields.workerId && asset.requiredCertification) {
       const worker = await this.parties.requireWorker(fields.workerId, session);
-      const certification = checkCertification(worker.certifications, asset.requiredCertification, fields.effectiveAt);
+      const certification = checkCertification(
+        worker.certifications,
+        asset.requiredCertification,
+        fields.effectiveAt,
+      );
       if (!certification.qualified) {
         throw certificationRefusal(certification, {
           workerId: worker._id,

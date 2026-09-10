@@ -13,8 +13,16 @@ export class LedgerMovementsQuery {
     private readonly names: MovementNamesService,
   ) {}
 
-  async list(filter: MovementListFilter, cursor: string | null, limit: number): Promise<PaginatedMovements> {
-    const page = await this.movements.list(filter, cursor, Math.min(Math.max(limit, 1), MAX_PAGE_SIZE));
+  async list(
+    filter: MovementListFilter,
+    cursor: string | null,
+    limit: number,
+  ): Promise<PaginatedMovements> {
+    const page = await this.movements.list(
+      filter,
+      cursor,
+      Math.min(Math.max(limit, 1), MAX_PAGE_SIZE),
+    );
     return {
       movements: await this.names.attachNames(page.records),
       nextCursor: page.nextCursor,

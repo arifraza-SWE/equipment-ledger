@@ -4,7 +4,10 @@ import type { ClientSession } from 'mongoose';
 import { AssetsRepository } from '../assets/assets.repository';
 import { type MovementRecord } from '../ledger/persistence/movement.schema';
 import { MovementsRepository } from '../ledger/persistence/movements.repository';
-import { ReservationsRepository, toReservation } from '../ledger/persistence/reservations.repository';
+import {
+  ReservationsRepository,
+  toReservation,
+} from '../ledger/persistence/reservations.repository';
 
 export interface ServiceWithdrawal {
   assetId: string;
@@ -36,8 +39,15 @@ export class ServiceWithdrawalRecorder {
     private readonly reservations: ReservationsRepository,
   ) {}
 
-  async record(withdrawal: ServiceWithdrawal, session: ClientSession): Promise<ServiceWithdrawalOutcome> {
-    const sequence = await this.assets.claimLedgerWrite(withdrawal.assetId, withdrawal.expectedVersion, session);
+  async record(
+    withdrawal: ServiceWithdrawal,
+    session: ClientSession,
+  ): Promise<ServiceWithdrawalOutcome> {
+    const sequence = await this.assets.claimLedgerWrite(
+      withdrawal.assetId,
+      withdrawal.expectedVersion,
+      session,
+    );
     const movement = await this.movements.insert(
       {
         assetId: withdrawal.assetId,
@@ -56,7 +66,11 @@ export class ServiceWithdrawalRecorder {
       session,
     );
 
-    const standing = await this.reservations.findActiveEndingAfter(withdrawal.assetId, withdrawal.now, session);
+    const standing = await this.reservations.findActiveEndingAfter(
+      withdrawal.assetId,
+      withdrawal.now,
+      session,
+    );
     const voided: Reservation[] = [];
     for (const reservation of standing) {
       const closed = await this.reservations.close(
@@ -69,7 +83,12 @@ export class ServiceWithdrawalRecorder {
       if (closed) {
         voided.push(
           toReservation(
-            { ...reservation, status: 'voided', closedAt: withdrawal.now, closedReason: OUT_OF_SERVICE_VOID_REASON },
+            {
+              ...reservation,
+              status: 'voided',
+              closedAt: withdrawal.now,
+              closedReason: OUT_OF_SERVICE_VOID_REASON,
+            },
             withdrawal.now,
           ),
         );

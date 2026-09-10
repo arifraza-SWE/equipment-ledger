@@ -1,4 +1,8 @@
-import { CORRECTION_KINDS, type CorrectionKind, type CorrectMovementRequest } from '@equipment-ledger/shared';
+import {
+  CORRECTION_KINDS,
+  type CorrectionKind,
+  type CorrectMovementRequest,
+} from '@equipment-ledger/shared';
 import { IsIn, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { IsIdentifier } from '../../../common/validation/identifier';
 import { IsInstant } from '../../../common/validation/is-instant.decorator';

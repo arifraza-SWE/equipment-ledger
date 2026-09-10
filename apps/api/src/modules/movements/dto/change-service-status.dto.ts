@@ -1,4 +1,8 @@
-import { type ChangeServiceStatusRequest, SERVICE_STATUSES, type ServiceStatus } from '@equipment-ledger/shared';
+import {
+  type ChangeServiceStatusRequest,
+  SERVICE_STATUSES,
+  type ServiceStatus,
+} from '@equipment-ledger/shared';
 import { IsIn, IsOptional, IsString, Length } from 'class-validator';
 import { IsIdentifier } from '../../../common/validation/identifier';
 import { IsInstant } from '../../../common/validation/is-instant.decorator';

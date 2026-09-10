@@ -8,7 +8,10 @@ import { TransactionRunner } from '../../database/transaction-runner';
 import { AssetsRepository } from '../assets/assets.repository';
 import { replayTimeline } from '../ledger/domain/asset-timeline';
 import { MovementsRepository, toTimelineEntry } from '../ledger/persistence/movements.repository';
-import { ReservationsRepository, toReservation } from '../ledger/persistence/reservations.repository';
+import {
+  ReservationsRepository,
+  toReservation,
+} from '../ledger/persistence/reservations.repository';
 import { LedgerParties } from '../movements/ledger-parties';
 import { checkCertification } from '../workers/domain/certification-check';
 import { certificationRefusal } from '../workers/domain/certification-refusal';
@@ -32,9 +35,13 @@ export class CreateReservationUseCase {
     };
     const windowProblem = findReservationWindowProblem(window, this.clock.now());
     if (windowProblem) {
-      throw new RuleViolationError('reservation_window_invalid', describeWindowProblem(windowProblem), {
-        problem: windowProblem.kind,
-      });
+      throw new RuleViolationError(
+        'reservation_window_invalid',
+        describeWindowProblem(windowProblem),
+        {
+          problem: windowProblem.kind,
+        },
+      );
     }
 
     const created = await this.transactions.run(async (session) => {
@@ -43,7 +50,9 @@ export class CreateReservationUseCase {
       const worker = await this.parties.requireWorker(request.workerId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 
-      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(toTimelineEntry);
+      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
+        toTimelineEntry,
+      );
       const state = replayTimeline(timeline);
       if (state.serviceStatus === 'out_of_service') {
         throw new RuleViolationError(
@@ -54,7 +63,11 @@ export class CreateReservationUseCase {
       }
 
       if (asset.requiredCertification) {
-        const certification = checkCertification(worker.certifications, asset.requiredCertification, window.startsAt);
+        const certification = checkCertification(
+          worker.certifications,
+          asset.requiredCertification,
+          window.startsAt,
+        );
         if (!certification.qualified) {
           throw certificationRefusal(certification, {
             workerId: worker._id,

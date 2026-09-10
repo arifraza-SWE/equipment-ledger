@@ -13,9 +13,15 @@ export type ClaimOutcome = { kind: 'owned' } | { kind: 'replay'; response: Store
 export class IdempotencyService {
   private readonly logger = new Logger(IdempotencyService.name);
 
-  constructor(@InjectModel(IdempotencyRecord.name) private readonly records: Model<IdempotencyRecord>) {}
+  constructor(
+    @InjectModel(IdempotencyRecord.name) private readonly records: Model<IdempotencyRecord>,
+  ) {}
 
-  async claim(idempotencyKey: string, requestFingerprint: string, now: Date): Promise<ClaimOutcome> {
+  async claim(
+    idempotencyKey: string,
+    requestFingerprint: string,
+    now: Date,
+  ): Promise<ClaimOutcome> {
     try {
       await this.records.create({
         _id: idempotencyKey,
@@ -86,5 +92,10 @@ export class IdempotencyService {
 }
 
 function isDuplicateKeyError(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === DUPLICATE_KEY_ERROR;
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === DUPLICATE_KEY_ERROR
+  );
 }

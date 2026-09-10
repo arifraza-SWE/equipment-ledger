@@ -13,7 +13,10 @@ export class KeepersRepository {
   }
 
   async findById(keeperId: string, session?: ClientSession): Promise<KeeperRecord | null> {
-    return this.keepers.findById(keeperId).session(session ?? null).lean();
+    return this.keepers
+      .findById(keeperId)
+      .session(session ?? null)
+      .lean();
   }
 
   async findByIds(keeperIds: readonly string[]): Promise<Map<string, KeeperRecord>> {

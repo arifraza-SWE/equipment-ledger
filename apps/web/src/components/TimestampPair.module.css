@@ -1,0 +1,29 @@
+.inline,
+.stacked {
+  display: flex;
+  gap: 4px 24px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.stacked {
+  flex-direction: column;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.entry dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+}
+
+.entry dd {
+  margin: 0;
+  font-size: 13px;
+}

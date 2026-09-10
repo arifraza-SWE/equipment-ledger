@@ -1,11 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ChangeServiceStatusRequest, ServiceStatusChangeResult } from '@equipment-ledger/shared';
+import type {
+  ChangeServiceStatusRequest,
+  ServiceStatusChangeResult,
+} from '@equipment-ledger/shared';
 import { CLOCK, type Clock } from '../../common/time/clock';
 import { requireInstant } from '../../common/time/require-instant';
 import { TransactionRunner } from '../../database/transaction-runner';
 import { AssetsRepository } from '../assets/assets.repository';
-import { findTimelineViolation, sortTimeline, type TimelineEntry } from '../ledger/domain/asset-timeline';
-import { MovementsRepository, toMovement, toTimelineEntry } from '../ledger/persistence/movements.repository';
+import {
+  findTimelineViolation,
+  sortTimeline,
+  type TimelineEntry,
+} from '../ledger/domain/asset-timeline';
+import {
+  MovementsRepository,
+  toMovement,
+  toTimelineEntry,
+} from '../ledger/persistence/movements.repository';
 import { StoreSnapshotService } from '../ledger/store-snapshot.service';
 import { LedgerParties } from './ledger-parties';
 import { ServiceWithdrawalRecorder } from './service-withdrawal.recorder';
@@ -28,17 +39,31 @@ export class ChangeServiceStatusUseCase {
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
-  async execute(assetId: string, request: ChangeServiceStatusRequest): Promise<ServiceStatusChangeResult> {
+  async execute(
+    assetId: string,
+    request: ChangeServiceStatusRequest,
+  ): Promise<ServiceStatusChangeResult> {
     const outcome = await this.transactions.run(async (session) => {
       const now = this.clock.now();
-      const effectiveAt = request.effectiveAt ? requireInstant(request.effectiveAt, 'effectiveAt') : now;
+      const effectiveAt = request.effectiveAt
+        ? requireInstant(request.effectiveAt, 'effectiveAt')
+        : now;
       const asset = await this.parties.requireAsset(assetId, session);
       const keeper = await this.parties.requireKeeper(request.keeperId, session);
 
-      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(toTimelineEntry);
-      assertEntryCanBeAppended({ timeline, effectiveAt, assetId: asset._id, registeredAt: asset.registeredAt, now });
+      const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
+        toTimelineEntry,
+      );
+      assertEntryCanBeAppended({
+        timeline,
+        effectiveAt,
+        assetId: asset._id,
+        registeredAt: asset.registeredAt,
+        now,
+      });
 
-      const movementType = request.status === 'out_of_service' ? 'out_of_service' : 'back_in_service';
+      const movementType =
+        request.status === 'out_of_service' ? 'out_of_service' : 'back_in_service';
       const candidate: TimelineEntry = {
         movementId: PENDING_ENTRY_ID,
         type: movementType,
@@ -56,7 +81,14 @@ export class ChangeServiceStatusUseCase {
 
       if (movementType === 'out_of_service') {
         return this.withdrawals.record(
-          { assetId: asset._id, keeperId: keeper._id, effectiveAt, reason: request.reason, now, expectedVersion: asset.version },
+          {
+            assetId: asset._id,
+            keeperId: keeper._id,
+            effectiveAt,
+            reason: request.reason,
+            now,
+            expectedVersion: asset.version,
+          },
           session,
         );
       }

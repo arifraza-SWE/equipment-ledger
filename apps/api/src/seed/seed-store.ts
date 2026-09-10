@@ -7,7 +7,10 @@ import { KeepersRepository } from '../modules/keepers/keepers.repository';
 import { findTimelineViolation, sortTimeline } from '../modules/ledger/domain/asset-timeline';
 import { CorrectionsRepository } from '../modules/ledger/persistence/corrections.repository';
 import { type MovementRecord } from '../modules/ledger/persistence/movement.schema';
-import { MovementsRepository, toTimelineEntry } from '../modules/ledger/persistence/movements.repository';
+import {
+  MovementsRepository,
+  toTimelineEntry,
+} from '../modules/ledger/persistence/movements.repository';
 import { type ReservationRecord } from '../modules/ledger/persistence/reservation.schema';
 import { ReservationsRepository } from '../modules/ledger/persistence/reservations.repository';
 import { WorkersRepository } from '../modules/workers/workers.repository';
@@ -38,7 +41,10 @@ type SeedReservationRecord = ReservationRecord;
  * so running this twice yields the same collections, byte for byte, apart from timestamps that
  * are themselves derived from the anchor date.
  */
-export async function seedStore(context: INestApplicationContext, anchor: Date): Promise<SeedSummary> {
+export async function seedStore(
+  context: INestApplicationContext,
+  anchor: Date,
+): Promise<SeedSummary> {
   const clock = seedClock(anchor);
   const connection = context.get<Connection>(getConnectionToken());
   const assets = context.get(AssetsRepository);
@@ -55,7 +61,10 @@ export async function seedStore(context: INestApplicationContext, anchor: Date):
   const { movementRecords, correctionRecords } = compileLedger(loans, scenarios);
   const registeredAt = clock.at(REGISTRATION_DAY_OFFSET, '08:00');
 
-  assertConsistent(movementRecords, catalogue.map((asset) => asset.assetId));
+  assertConsistent(
+    movementRecords,
+    catalogue.map((asset) => asset.assetId),
+  );
   await syncIndexes(connection);
 
   await Promise.all([
@@ -70,7 +79,11 @@ export async function seedStore(context: INestApplicationContext, anchor: Date):
 
   const writesPerAsset = countWritesPerAsset(movementRecords, reservationRecords);
   await assets.insertMany(
-    catalogue.map((asset) => ({ ...asset, registeredAt, version: writesPerAsset.get(asset.assetId) ?? 0 })),
+    catalogue.map((asset) => ({
+      ...asset,
+      registeredAt,
+      version: writesPerAsset.get(asset.assetId) ?? 0,
+    })),
   );
   await workers.insertMany(
     WORKERS.map((worker) => ({
@@ -111,11 +124,21 @@ function compileReservations(scenarios: SeedScenarios, clock: SeedClock): SeedRe
     };
     switch (reservation.outcome.kind) {
       case 'standing':
-        return { ...base, status: 'active' as const, fulfilledByMovementId: null, closedAt: null, closedReason: null };
+        return {
+          ...base,
+          status: 'active' as const,
+          fulfilledByMovementId: null,
+          closedAt: null,
+          closedReason: null,
+        };
       case 'fulfilled': {
-        const loanLabel = scenarios.loans.find((loan) => loan.reservationLabel === reservation.label)?.label;
+        const loanLabel = scenarios.loans.find(
+          (loan) => loan.reservationLabel === reservation.label,
+        )?.label;
         if (!loanLabel) {
-          throw new Error(`Seed reservation "${reservation.label}" is fulfilled but no loan references it`);
+          throw new Error(
+            `Seed reservation "${reservation.label}" is fulfilled but no loan references it`,
+          );
         }
         const fulfillingLoan = scenarios.loans.find((loan) => loan.label === loanLabel);
         return {
@@ -147,7 +170,12 @@ function compileReservations(scenarios: SeedScenarios, clock: SeedClock): SeedRe
 }
 
 function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
-  const reservationIds = new Map(scenarios.reservations.map((reservation) => [reservation.label, deterministicObjectId(`reservation:${reservation.label}`)]));
+  const reservationIds = new Map(
+    scenarios.reservations.map((reservation) => [
+      reservation.label,
+      deterministicObjectId(`reservation:${reservation.label}`),
+    ]),
+  );
   const movementRecords: SeedMovement[] = [];
 
   for (const loan of loans) {
@@ -161,7 +189,9 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       effectiveAt: loan.issuedAt,
       recordedAt: loan.issueRecordedAt ?? recordedAfter(loan.issuedAt),
       dueAt: loan.dueAt,
-      reservationId: loan.reservationLabel ? (reservationIds.get(loan.reservationLabel) ?? null) : null,
+      reservationId: loan.reservationLabel
+        ? (reservationIds.get(loan.reservationLabel) ?? null)
+        : null,
       note: loan.issueNote ?? null,
       sequence: 0,
       supersededByCorrectionId: null,
@@ -230,7 +260,9 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
     const originalId = movementId(correction.targetLoanLabel, correction.targetMovement);
     const original = movementRecords.find((record) => record._id.equals(originalId));
     if (!original) {
-      throw new Error(`Seed correction "${correction.label}" targets a movement that does not exist`);
+      throw new Error(
+        `Seed correction "${correction.label}" targets a movement that does not exist`,
+      );
     }
     const correctionId = deterministicObjectId(`correction:${correction.label}`);
     const replacement: SeedMovement = {
@@ -253,7 +285,11 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       keeperId: correction.keeperId,
       recordedAt: correction.recordedAt,
       changes: [
-        { field: 'effectiveAt' as const, from: original.effectiveAt.toISOString(), to: correction.newEffectiveAt.toISOString() },
+        {
+          field: 'effectiveAt' as const,
+          from: original.effectiveAt.toISOString(),
+          to: correction.newEffectiveAt.toISOString(),
+        },
       ],
     };
   });
@@ -270,7 +306,11 @@ function assignSequences(movementRecords: SeedMovement[]): void {
   }
   for (const records of byAsset.values()) {
     records
-      .sort((left, right) => left.effectiveAt.getTime() - right.effectiveAt.getTime() || typeOrder(left) - typeOrder(right))
+      .sort(
+        (left, right) =>
+          left.effectiveAt.getTime() - right.effectiveAt.getTime() ||
+          typeOrder(left) - typeOrder(right),
+      )
       .forEach((record, index) => {
         record.sequence = index + 1;
       });
@@ -281,7 +321,10 @@ function typeOrder(record: SeedMovement): number {
   return record.type === 'return' ? 0 : record.type === 'out_of_service' ? 1 : 2;
 }
 
-function countWritesPerAsset(movementRecords: SeedMovement[], reservationRecords: SeedReservationRecord[]): Map<string, number> {
+function countWritesPerAsset(
+  movementRecords: SeedMovement[],
+  reservationRecords: SeedReservationRecord[],
+): Map<string, number> {
   const counts = new Map<string, number>();
   for (const record of [...movementRecords, ...reservationRecords]) {
     counts.set(record.assetId, (counts.get(record.assetId) ?? 0) + 1);
@@ -304,9 +347,13 @@ function assertConsistent(movementRecords: SeedMovement[], assetIds: string[]): 
     byAsset.set(record.assetId, forAsset);
   }
   for (const [assetId, records] of byAsset) {
-    const violation = findTimelineViolation(sortTimeline(records.map((record) => toTimelineEntry(record))));
+    const violation = findTimelineViolation(
+      sortTimeline(records.map((record) => toTimelineEntry(record))),
+    );
     if (violation) {
-      throw new Error(`Seed data would give ${assetId} an impossible history: ${violation.kind} at ${violation.entry.effectiveAt.toISOString()}`);
+      throw new Error(
+        `Seed data would give ${assetId} an impossible history: ${violation.kind} at ${violation.entry.effectiveAt.toISOString()}`,
+      );
     }
   }
 }
