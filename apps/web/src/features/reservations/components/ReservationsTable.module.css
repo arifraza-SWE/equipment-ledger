@@ -1,0 +1,52 @@
+.statusCell {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.closedReason {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.cancelCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.cancelMessage {
+  font-size: 12px;
+  color: var(--error-fg);
+  white-space: normal;
+  max-width: 320px;
+}
+
+.filter {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.filterLink {
+  padding: 4px 10px;
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+}
+
+.filterLink:hover {
+  color: var(--ink);
+}
+
+.filterLink[aria-current='page'] {
+  color: var(--ink);
+  border-color: var(--hairline-strong);
+  background: var(--card);
+}

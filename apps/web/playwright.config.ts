@@ -10,6 +10,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3100',
     trace: 'retain-on-failure',
+    // Deliberately not the site's timezone: the screens must read the same either way.
+    timezoneId: 'America/New_York',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

@@ -2,7 +2,7 @@ import type { StoreSnapshot } from '@equipment-ledger/shared';
 import { EmptyState } from '@/components/EmptyState';
 import { Instant } from '@/components/Instant';
 import { Notice } from '@/components/Notice';
-import { formatInstant } from '@/lib/format-instant';
+import { formatInstant } from '@/lib/site-time';
 import type { WorkerNamesById } from '@/features/workers/worker-names';
 import { AsOfInstantPicker } from './AsOfInstantPicker';
 import { AssetLedgerTable } from './AssetLedgerTable';

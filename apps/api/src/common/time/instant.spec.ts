@@ -1,4 +1,4 @@
-import { describeInstant, parseInstant } from './instant';
+import { parseInstant } from './instant';
 
 describe('parseInstant', () => {
   it('accepts ISO 8601 with Z or an offset', () => {
@@ -18,11 +18,5 @@ describe('parseInstant', () => {
     expect(parseInstant('1757489400000')).toBeNull();
     expect(parseInstant('yesterday')).toBeNull();
     expect(parseInstant('2026-13-40T07:30:00Z')).toBeNull();
-  });
-});
-
-describe('describeInstant', () => {
-  it('reads as a time on a date, in UTC', () => {
-    expect(describeInstant(new Date('2026-09-10T07:30:00Z'))).toBe('07:30 UTC on 2026-09-10');
   });
 });

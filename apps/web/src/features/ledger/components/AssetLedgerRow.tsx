@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { AssetStatusBadge } from '@/components/AssetStatusBadge';
 import { Instant } from '@/components/Instant';
 import { StatusBadge } from '@/components/StatusBadge';
-import { formatInstant } from '@/lib/format-instant';
+import { formatWindow } from '@/lib/site-time';
 import { workerNameOr, type WorkerNamesById } from '@/features/workers/worker-names';
 import styles from './AssetLedgerTable.module.css';
 
@@ -44,11 +44,13 @@ export function AssetLedgerRow({ snapshot, workerNamesById, showActions }: Asset
           <span className="muted">–</span>
         )}
       </td>
-      <td>{holding ? <Instant iso={holding.effectiveAt} /> : <span className="muted">–</span>}</td>
+      <td>
+        {holding ? <Instant iso={holding.effectiveAt} compact /> : <span className="muted">–</span>}
+      </td>
       <td className={snapshot.overdue ? styles.overdueDue : undefined}>
         {holding?.dueAt ? (
           <>
-            <Instant iso={holding.dueAt} />
+            <Instant iso={holding.dueAt} compact />
             {snapshot.overdue && <span className={styles.overdueFlag}> overdue</span>}
           </>
         ) : (
@@ -82,5 +84,5 @@ function describeReservation(snapshot: AssetSnapshot, workerNamesById: WorkerNam
 }
 
 function reservationWindowText(reservation: Reservation): string {
-  return `${formatInstant(reservation.startsAt)} to ${formatInstant(reservation.endsAt)}`;
+  return formatWindow(reservation.startsAt, reservation.endsAt);
 }

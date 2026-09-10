@@ -5,11 +5,11 @@ import type {
 } from '@equipment-ledger/shared';
 import { apiMutation, apiRequest, type MutationOutcome } from '@/lib/api-client';
 
-export interface ReservationFilters {
+export type ReservationFilters = {
   assetId?: string;
   workerId?: string;
   status?: ReservationStatus;
-}
+};
 
 export function fetchReservations(filters: ReservationFilters = {}): Promise<Reservation[]> {
   return apiRequest<Reservation[]>('/reservations', { query: filters });

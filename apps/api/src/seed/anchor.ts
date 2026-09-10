@@ -1,4 +1,5 @@
 import { addDays, addMinutes, days } from '../common/time/instant';
+import { endOfSiteDay } from '../config/site-time';
 
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -30,7 +31,7 @@ export function seedClock(anchor: Date): SeedClock {
       return addMinutes(addDays(anchor, dayOffset), totalMinutes);
     },
     endOfDay(dayOffset) {
-      return new Date(addDays(anchor, dayOffset + 1).getTime() - 1000);
+      return endOfSiteDay(this.at(dayOffset, '12:00'));
     },
     weekday(dayOffset) {
       return addDays(anchor, dayOffset).getUTCDay();

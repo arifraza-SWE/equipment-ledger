@@ -6,6 +6,8 @@ loadDotenv({
   quiet: true,
 });
 
+process.env.SITE_TIMEZONE = process.env.SITE_TIMEZONE ?? 'UTC';
+
 if (!process.env.MONGODB_TEST_URI) {
   process.env.MONGODB_TEST_URI =
     'mongodb://localhost:27017/equipment_ledger_test?replicaSet=rs0&directConnection=true';

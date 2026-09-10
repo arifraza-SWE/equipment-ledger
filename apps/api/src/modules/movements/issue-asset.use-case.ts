@@ -7,7 +7,7 @@ import {
   StateConflictError,
 } from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
-import { addHours, describeInstant } from '../../common/time/instant';
+import { addHours } from '../../common/time/instant';
 import { requireInstant } from '../../common/time/require-instant';
 import { TransactionRunner } from '../../database/transaction-runner';
 import { type AssetRecord } from '../assets/asset.schema';
@@ -37,6 +37,7 @@ import {
   PENDING_ENTRY_SEQUENCE,
   timelineViolationToError,
 } from './timeline-conflicts';
+import { describeInstant } from '../../config/site-time';
 
 @Injectable()
 export class IssueAssetUseCase {

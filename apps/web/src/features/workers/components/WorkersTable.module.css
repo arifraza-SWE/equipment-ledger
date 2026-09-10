@@ -1,0 +1,20 @@
+.certificates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.certificates li[data-expired='true'] {
+  color: var(--status-overdue-fg);
+}
+
+.expiry {
+  font-size: 12px;
+}
+
+.certificates li[data-expired='false'] .expiry {
+  color: var(--ink-muted);
+}

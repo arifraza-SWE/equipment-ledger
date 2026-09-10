@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { CreateReservationRequest, Reservation } from '@equipment-ledger/shared';
 import { RuleViolationError, StateConflictError } from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
-import { describeInstant } from '../../common/time/instant';
+
 import { requireInstant } from '../../common/time/require-instant';
 import { TransactionRunner } from '../../database/transaction-runner';
 import { AssetsRepository } from '../assets/assets.repository';
@@ -16,6 +16,7 @@ import { LedgerParties } from '../movements/ledger-parties';
 import { checkCertification } from '../workers/domain/certification-check';
 import { certificationRefusal } from '../workers/domain/certification-refusal';
 import { describeWindowProblem, findReservationWindowProblem } from './domain/reservation-window';
+import { describeInstant } from '../../config/site-time';
 
 @Injectable()
 export class CreateReservationUseCase {

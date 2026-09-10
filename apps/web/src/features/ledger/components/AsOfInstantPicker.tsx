@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Button } from '@/components/Button';
-import { datetimeLocalFromIso, isoFromDatetimeLocal, toDatetimeLocalValue } from '@/lib/datetime-local';
+import { siteWallClockFromIso, isoFromSiteWallClock, siteWallClockNow } from '@/lib/site-time';
 import styles from './AsOfLedgerView.module.css';
 
 interface QuickPick {
@@ -21,12 +21,12 @@ const QUICK_PICKS: readonly QuickPick[] = [
 export function AsOfInstantPicker({ initialAt }: { initialAt: string | null }) {
   const router = useRouter();
   const inputId = useId();
-  const [inputValue, setInputValue] = useState(datetimeLocalFromIso(initialAt));
+  const [inputValue, setInputValue] = useState(siteWallClockFromIso(initialAt));
   const [problem, setProblem] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialAt === null) {
-      setInputValue(toDatetimeLocalValue(new Date()));
+      setInputValue(siteWallClockNow());
     }
   }, [initialAt]);
 
@@ -36,7 +36,7 @@ export function AsOfInstantPicker({ initialAt }: { initialAt: string | null }) {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const iso = isoFromDatetimeLocal(inputValue);
+    const iso = isoFromSiteWallClock(inputValue);
     if (iso === null) {
       setProblem('Enter a date and time.');
       return;

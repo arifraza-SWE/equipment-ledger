@@ -1,9 +1,16 @@
-import { formatInstant } from '@/lib/format-instant';
+import { classNames } from '@/lib/class-names';
+import { formatInstant, formatInstantCompact } from '@/lib/site-time';
 
-export function Instant({ iso, className }: { iso: string; className?: string }) {
+interface InstantProps {
+  iso: string;
+  compact?: boolean;
+  className?: string;
+}
+
+export function Instant({ iso, compact = false, className }: InstantProps) {
   return (
-    <time dateTime={iso} className={className ? `mono ${className}` : 'mono'}>
-      {formatInstant(iso)}
+    <time dateTime={iso} className={classNames('mono', className)}>
+      {compact ? formatInstantCompact(iso) : formatInstant(iso)}
     </time>
   );
 }

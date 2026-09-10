@@ -19,7 +19,7 @@ import { AssetField } from '@/features/assets/components/AssetField';
 import { WorkerField } from '@/features/workers/components/WorkerField';
 import { indexWorkerNames } from '@/features/workers/worker-names';
 import { useLedgerSubmission } from '@/hooks/use-ledger-submission';
-import { isoFromDatetimeLocal, toDatetimeLocalValue } from '@/lib/datetime-local';
+import { isoFromSiteWallClock, siteWallClockNow } from '@/lib/site-time';
 import { issueAsset } from '../api/movements-api';
 import { MovementResultSummary } from './MovementResultSummary';
 import { ReservationLinkField } from './ReservationLinkField';
@@ -74,11 +74,11 @@ export function IssueAssetForm({
   const submission = useLedgerSubmission<IssueAssetRequest, MovementResult>('issue-asset', issueAsset);
 
   useEffect(() => {
-    setValues((current) => ({ ...current, effectiveAt: toDatetimeLocalValue(new Date()) }));
+    setValues((current) => ({ ...current, effectiveAt: siteWallClockNow() }));
   }, []);
 
   const chosenAsset = issuableAssets.find((snapshot) => snapshot.asset.assetId === values.assetId);
-  const effectiveAtIso = isoFromDatetimeLocal(values.effectiveAt);
+  const effectiveAtIso = isoFromSiteWallClock(values.effectiveAt);
   const workerReservations = activeReservations.filter(
     (reservation) =>
       reservation.assetId === values.assetId && reservation.workerId === values.workerId,
@@ -99,12 +99,12 @@ export function IssueAssetForm({
       workerId: values.workerId,
       keeperId: selectedKeeper.keeperId,
       effectiveAt: effectiveAtIso,
-      dueAt: isoFromDatetimeLocal(values.dueAt),
+      dueAt: isoFromSiteWallClock(values.dueAt),
       reservationId: values.reservationId || null,
       note: values.note.trim() || null,
     });
     if (succeeded) {
-      setValues({ ...EMPTY_VALUES, effectiveAt: toDatetimeLocalValue(new Date()) });
+      setValues({ ...EMPTY_VALUES, effectiveAt: siteWallClockNow() });
     }
   };
 

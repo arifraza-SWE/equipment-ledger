@@ -1,7 +1,8 @@
 import { CERTIFICATION_LABELS, type CertificationType } from '@equipment-ledger/shared';
 import { RuleViolationError } from '../../../common/errors/domain-error';
-import { isoDate } from '../../../common/time/instant';
+
 import type { CertificationCheck } from './certification-check';
+import { isoDate } from '../../../config/site-time';
 
 export interface CertificationRefusalContext {
   workerId: string;

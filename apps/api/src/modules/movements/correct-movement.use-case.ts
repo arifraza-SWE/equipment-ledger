@@ -11,7 +11,7 @@ import {
   StateConflictError,
 } from '../../common/errors/domain-error';
 import { CLOCK, type Clock } from '../../common/time/clock';
-import { describeInstant } from '../../common/time/instant';
+
 import { requireInstant } from '../../common/time/require-instant';
 import { TransactionRunner } from '../../database/transaction-runner';
 import { type AssetRecord } from '../assets/asset.schema';
@@ -35,6 +35,7 @@ import { checkCertification } from '../workers/domain/certification-check';
 import { certificationRefusal } from '../workers/domain/certification-refusal';
 import { LedgerParties } from './ledger-parties';
 import { assertNotInFuture, timelineViolationToError } from './timeline-conflicts';
+import { describeInstant } from '../../config/site-time';
 
 interface ReplacementDraft {
   fields: Omit<NewMovement, 'recordedAt' | 'sequence' | 'createdByCorrectionId'>;

@@ -1,0 +1,19 @@
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 32px;
+  align-items: start;
+}
+
+.formColumn {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 16px 18px 20px;
+}
+
+@media (max-width: 1000px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -40,13 +40,3 @@ export function isBefore(left: Date, right: Date): boolean {
 export function isSameInstant(left: Date, right: Date): boolean {
   return left.getTime() === right.getTime();
 }
-
-export function describeInstant(instant: Date): string {
-  const day = instant.toISOString().slice(0, 10);
-  const time = instant.toISOString().slice(11, 16);
-  return `${time} UTC on ${day}`;
-}
-
-export function isoDate(instant: Date): string {
-  return instant.toISOString().slice(0, 10);
-}

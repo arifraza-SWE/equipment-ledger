@@ -4,7 +4,7 @@ import {
   type Worker,
 } from '@equipment-ledger/shared';
 import { Field } from '@/components/Field';
-import { formatDay } from '@/lib/format-instant';
+import { formatDay } from '@/lib/site-time';
 import formStyles from '@/components/Form.module.css';
 import { certificationStanding, isCertificationExpired } from '../domain/certification-standing';
 import styles from './WorkerField.module.css';

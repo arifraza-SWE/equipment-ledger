@@ -69,6 +69,21 @@ export async function attemptRequest<TValue>(
   }
 }
 
+type LoadedValues<TLoaders extends readonly (() => Promise<unknown>)[]> = {
+  -readonly [Index in keyof TLoaders]: Awaited<ReturnType<TLoaders[Index]>>;
+};
+
+export async function attemptAll<const TLoaders extends readonly (() => Promise<unknown>)[]>(
+  loaders: TLoaders,
+): Promise<RequestOutcome<LoadedValues<TLoaders>>> {
+  try {
+    const values = await Promise.all(loaders.map((load) => load()));
+    return { ok: true, value: values as LoadedValues<TLoaders> };
+  } catch (error) {
+    return { ok: false, message: describeRequestFailure(error), notFound: isNotFound(error) };
+  }
+}
+
 export function describeRequestFailure(error: unknown): string {
   if (error instanceof ApiRequestError || error instanceof ApiUnreachableError) {
     return error.message;

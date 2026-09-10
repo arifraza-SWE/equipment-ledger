@@ -4,8 +4,9 @@ import {
   RuleViolationError,
   StateConflictError,
 } from '../../common/errors/domain-error';
-import { describeInstant, minutes } from '../../common/time/instant';
+import { minutes } from '../../common/time/instant';
 import type { TimelineEntry, TimelineViolation } from '../ledger/domain/asset-timeline';
+import { describeInstant } from '../../config/site-time';
 
 export interface TimelineNames {
   assetId: string;

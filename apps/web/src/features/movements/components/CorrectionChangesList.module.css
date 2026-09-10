@@ -1,0 +1,25 @@
+.changes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+}
+
+.field {
+  display: inline-block;
+  min-width: 96px;
+  color: var(--ink-muted);
+}
+
+.from {
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-muted);
+  color: var(--ink-soft);
+}
+
+.to {
+  font-weight: 500;
+}

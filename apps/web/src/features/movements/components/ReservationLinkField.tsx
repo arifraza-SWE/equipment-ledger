@@ -1,7 +1,7 @@
 import type { Reservation } from '@equipment-ledger/shared';
 import { Field } from '@/components/Field';
 import formStyles from '@/components/Form.module.css';
-import { formatInstant } from '@/lib/format-instant';
+import { formatWindow } from '@/lib/site-time';
 
 interface ReservationLinkFieldProps {
   reservations: Reservation[];
@@ -36,7 +36,7 @@ export function ReservationLinkField({ reservations, value, onChange }: Reservat
           <option value="">Automatic</option>
           {reservations.map((reservation) => (
             <option key={reservation.reservationId} value={reservation.reservationId}>
-              {formatInstant(reservation.startsAt)} to {formatInstant(reservation.endsAt)}
+              {formatWindow(reservation.startsAt, reservation.endsAt)}
               {reservation.standing ? ` · ${reservation.standing}` : ''}
             </option>
           ))}
