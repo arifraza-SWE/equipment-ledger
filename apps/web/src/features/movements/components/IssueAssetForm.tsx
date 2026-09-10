@@ -120,11 +120,12 @@ export function IssueAssetForm({
       )}
       <AssetField
         label="Asset"
-        assets={issuableAssets}
+        assets={assets}
         value={values.assetId}
         onChange={(assetId) => update('assetId', assetId)}
+        unavailableReason={describeWhyNotIssuable}
         error={fieldErrors.assetId}
-        hint="Only assets in store and in service are listed."
+        hint="Assets that cannot go out are greyed out with the reason."
       />
       <WorkerField
         label="Worker"
@@ -179,7 +180,18 @@ export function IssueAssetForm({
 }
 
 function isIssuable(snapshot: AssetSnapshot): boolean {
-  return snapshot.holding === null && snapshot.serviceStatus === 'in_service';
+  return describeWhyNotIssuable(snapshot) === null;
+}
+
+/** The exact complement of "can go out", so the list and the guard can never disagree. */
+function describeWhyNotIssuable(snapshot: AssetSnapshot): string | null {
+  if (snapshot.serviceStatus === 'out_of_service') {
+    return 'out of service';
+  }
+  if (snapshot.holding) {
+    return `with ${snapshot.holding.worker.fullName}`;
+  }
+  return null;
 }
 
 function findProblems(values: IssueFormValues, effectiveAtIso: string | null): FieldErrors {

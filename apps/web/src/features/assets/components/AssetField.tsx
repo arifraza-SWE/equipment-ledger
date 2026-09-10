@@ -13,6 +13,12 @@ interface AssetFieldProps {
   value: string;
   onChange: (assetId: string) => void;
   describeOption?: (snapshot: AssetSnapshot) => string;
+  /**
+   * Why this asset cannot be chosen, or null if it can. Assets that cannot be chosen stay in the
+   * list, greyed out and carrying the reason: a keeper hunting for one needs to find out that it
+   * is out of service, not that it has vanished.
+   */
+  unavailableReason?: (snapshot: AssetSnapshot) => string | null;
   hint?: React.ReactNode;
   error?: string | null;
 }
@@ -23,6 +29,7 @@ export function AssetField({
   value,
   onChange,
   describeOption = describeAssetOption,
+  unavailableReason,
   hint,
   error,
 }: AssetFieldProps) {
@@ -46,11 +53,19 @@ export function AssetField({
             <optgroup key={kind} label={ASSET_KIND_LABELS[kind]}>
               {assets
                 .filter((snapshot) => snapshot.asset.kind === kind)
-                .map((snapshot) => (
-                  <option key={snapshot.asset.assetId} value={snapshot.asset.assetId}>
-                    {describeOption(snapshot)}
-                  </option>
-                ))}
+                .map((snapshot) => {
+                  const reason = unavailableReason?.(snapshot) ?? null;
+                  return (
+                    <option
+                      key={snapshot.asset.assetId}
+                      value={snapshot.asset.assetId}
+                      disabled={reason !== null}
+                    >
+                      {describeOption(snapshot)}
+                      {reason === null ? '' : ` · ${reason}`}
+                    </option>
+                  );
+                })}
             </optgroup>
           ))}
         </select>
