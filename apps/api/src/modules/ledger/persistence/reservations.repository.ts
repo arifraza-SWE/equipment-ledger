@@ -184,6 +184,15 @@ export class ReservationsRepository {
     );
   }
 
+  /** Undoes a void when the withdrawal that caused it is itself voided. */
+  async reinstate(reservationId: Types.ObjectId, session: ClientSession): Promise<void> {
+    await this.reservations.updateOne(
+      { _id: reservationId, status: 'voided' },
+      { $set: { status: 'active', closedAt: null, closedReason: null } },
+      { session },
+    );
+  }
+
   async reopen(reservationId: Types.ObjectId, session: ClientSession): Promise<void> {
     await this.reservations.updateOne(
       { _id: reservationId, status: 'fulfilled' },

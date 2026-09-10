@@ -26,10 +26,30 @@ export type TimelineViolation =
   | { kind: 'already_in_service'; entry: TimelineEntry };
 
 export const HOLDING_MOVEMENT_TYPES: readonly MovementType[] = ['issue', 'return'];
-export const SERVICE_MOVEMENT_TYPES: readonly MovementType[] = [
-  'out_of_service',
-  'back_in_service',
-];
+
+export type LedgerTrack = 'holding' | 'service';
+
+/**
+ * Who holds an asset and whether it is serviceable are two independent stories told by one
+ * collection. They constrain each other only where the domain says so, which is why an entry
+ * is placed on a track rather than in one flat sequence.
+ */
+export function trackOf(type: MovementType): LedgerTrack {
+  return HOLDING_MOVEMENT_TYPES.includes(type) ? 'holding' : 'service';
+}
+
+export function lastEntryOnTrack(
+  sortedEntries: readonly TimelineEntry[],
+  track: LedgerTrack,
+): TimelineEntry | null {
+  for (let position = sortedEntries.length - 1; position >= 0; position -= 1) {
+    const entry = sortedEntries[position];
+    if (entry && trackOf(entry.type) === track) {
+      return entry;
+    }
+  }
+  return null;
+}
 
 export function compareTimelineOrder(
   left: { effectiveAt: Date; sequence: number },

@@ -14,10 +14,31 @@ export function toApiError(exception: unknown): ApiError {
   if (exception instanceof HttpException) {
     return fromHttpException(exception);
   }
+  const oversized = payloadTooLarge(exception);
+  if (oversized) {
+    return oversized;
+  }
   return {
     statusCode: 500,
     code: 'internal_error',
     message: 'The store could not process this request. Nothing was recorded.',
+  };
+}
+
+/** The JSON body parser rejects oversized bodies before any handler sees them. */
+function payloadTooLarge(exception: unknown): ApiError | null {
+  if (
+    typeof exception !== 'object' ||
+    exception === null ||
+    !('type' in exception) ||
+    exception.type !== 'entity.too.large'
+  ) {
+    return null;
+  }
+  return {
+    statusCode: 413,
+    code: 'validation_failed',
+    message: 'That request is too large for the hatch. A note may be at most 500 characters.',
   };
 }
 

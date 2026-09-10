@@ -32,11 +32,3 @@ export function addHours(instant: Date, count: number): Date {
 export function addDays(instant: Date, count: number): Date {
   return new Date(instant.getTime() + days(count));
 }
-
-export function isBefore(left: Date, right: Date): boolean {
-  return left.getTime() < right.getTime();
-}
-
-export function isSameInstant(left: Date, right: Date): boolean {
-  return left.getTime() === right.getTime();
-}

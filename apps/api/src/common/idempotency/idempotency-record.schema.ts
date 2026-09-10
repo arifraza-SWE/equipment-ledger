@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { type HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Schema as MongooseSchema } from 'mongoose';
 
 export const IDEMPOTENCY_RECORD_TTL_SECONDS = 24 * 60 * 60;
 
@@ -22,14 +22,15 @@ export class IdempotencyRecord {
   @Prop({ type: MongooseSchema.Types.Mixed, default: null })
   response: StoredResponse | null;
 
+  @Prop({ type: String, required: true })
+  claimToken: string;
+
   @Prop({ type: Date, required: true })
   claimedAt: Date;
 
   @Prop({ type: Date, default: null })
   completedAt: Date | null;
 }
-
-export type IdempotencyRecordDocument = HydratedDocument<IdempotencyRecord>;
 
 export const IdempotencyRecordSchema = SchemaFactory.createForClass(IdempotencyRecord);
 

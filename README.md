@@ -337,11 +337,19 @@ Policy for the two awkward cases, both of which the seed and the tests cover:
   ledger says so: the dashboard shows "issued" with an out-of-service flag, and the asset cannot
   be re-issued after it comes back until somebody brings it back into service.
 - **Withdrawn while reserved.** Standing reservations are voided, with `closedReason: "Asset
-taken out of service"` and the time. They are not deleted; they show in the reservations list
+  taken out of service"` and the time. They are not deleted; they show in the reservations list
   and the response to the withdrawal lists them so the keeper can tell the workers. Nothing is
   restored automatically when the asset returns to service; the worker re-reserves. I chose
   voiding over leaving reservations active because a reservation is a promise the store can no
   longer keep, and a dashboard that shows an unissuable asset as "reserved" is lying.
+- **Withdrawn by mistake.** The withdrawal records which reservations it voided, so voiding that
+  withdrawal as a correction puts exactly those claims back. A keeper who scans the wrong asset
+  can undo it without asking anyone to re-book.
+
+A return that also takes the asset out of service writes two movements in one transaction, and
+they stay linked: correcting the return moves its withdrawal with it, and voiding the return
+voids the withdrawal too. Otherwise the ledger would end up saying the asset was condemned while
+somebody was still holding it.
 
 ## Reservations
 

@@ -5,7 +5,7 @@ import {
 import { toTimelineEntry } from '../../src/modules/ledger/persistence/movements.repository';
 import { issueAsset, returnAsset } from '../support/ledger-requests';
 import { readEffectiveMovements } from '../support/mongo-readers';
-import { naiveStateAt, readAllMovements } from '../support/naive-replay';
+import { readAllMovements } from '../support/naive-replay';
 import { instant, openTestStore, type TestStore } from '../support/test-store';
 
 const STORM_TARGETS: Array<{ assetId: string; workerIds: string[] }> = [
@@ -94,28 +94,32 @@ describe('invariant: an asset has at most one holder at any instant', () => {
     }
   });
 
-  it('never shows two holders for one asset at any of ten thousand sampled instants', async () => {
-    const movements = await readAllMovements(store.connection);
-    const start = new Date(instant(-31, '00:00')).getTime();
-    const end = new Date(instant(1, '00:00')).getTime();
-    const step = Math.floor((end - start) / 10_000);
-    for (let sampled = start; sampled <= end; sampled += step) {
-      const holders = new Map<string, Set<string>>();
-      for (const movement of movements) {
-        if (
-          movement.supersededByCorrectionId !== null ||
-          movement.effectiveAt.getTime() > sampled
-        ) {
-          continue;
-        }
-        const state = naiveStateAt(movements, new Date(sampled)).get(movement.assetId);
-        if (state?.holderWorkerId) {
-          holders.set(movement.assetId, new Set([state.holderWorkerId]));
-        }
-      }
-      for (const [assetId, workerIds] of holders) {
-        expect({ assetId, holders: workerIds.size }).toEqual({ assetId, holders: 1 });
-      }
+  it('never has a second holder open on any asset, at any point in its recorded history', async () => {
+    const movements = (await readAllMovements(store.connection))
+      .filter((movement) => movement.supersededByCorrectionId === null)
+      .filter((movement) => movement.type === 'issue' || movement.type === 'return')
+      .sort(
+        (left, right) =>
+          left.effectiveAt.getTime() - right.effectiveAt.getTime() ||
+          left.sequence - right.sequence,
+      );
+
+    // Counted straight off the documents rather than through the app's own replay, and checked
+    // after every entry rather than at sampled instants, so a second open issue cannot hide
+    // between two samples.
+    const openHoldings = new Map<string, number>();
+    for (const movement of movements) {
+      const open = (openHoldings.get(movement.assetId) ?? 0) + (movement.type === 'issue' ? 1 : -1);
+      openHoldings.set(movement.assetId, open);
+      expect({
+        assetId: movement.assetId,
+        after: `${movement.type}@${movement.effectiveAt.toISOString()}`,
+        openHoldings: open,
+      }).toMatchObject({ openHoldings: open > 1 ? 1 : open < 0 ? 0 : open });
+    }
+
+    for (const [assetId, open] of openHoldings) {
+      expect({ assetId, open }).toMatchObject({ open: open > 1 ? 1 : open });
     }
   });
 });

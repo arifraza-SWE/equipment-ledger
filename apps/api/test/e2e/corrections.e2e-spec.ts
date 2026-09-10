@@ -354,6 +354,64 @@ describe('corrections', () => {
     });
   });
 
+  it("records who really took it even inside another worker's window, and hands the claim back", async () => {
+    const reserved = await reserveAsset(store, {
+      assetId: 'LAD-004',
+      workerId: 'WKR-011',
+      keeperId: 'KPR-01',
+      startsAt: instant(1, '13:00'),
+      endsAt: instant(1, '18:00'),
+    });
+    expect(reserved.status).toBe(201);
+    const reservationId = (reserved.body as Reservation).reservationId;
+
+    store.clock.set(new Date(instant(1, '13:40')));
+    const issued = await issueAsset(store, {
+      assetId: 'LAD-004',
+      workerId: 'WKR-011',
+      keeperId: 'KPR-01',
+      effectiveAt: instant(1, '13:30'),
+    });
+    expect(issued.status).toBe(201);
+
+    const corrected = await correctMovement(
+      store,
+      (issued.body as MovementResult).movement.movementId,
+      {
+        kind: 'amend',
+        reason: 'Hana took it off the rack, not Grace',
+        keeperId: 'KPR-01',
+        workerId: 'WKR-008',
+      },
+    );
+    expect(corrected.status).toBe(201);
+    expect((corrected.body as CorrectionResult).asset.holding?.worker.workerId).toBe('WKR-008');
+
+    const reservations = (await store.http.get('/reservations').query({ assetId: 'LAD-004' }))
+      .body as Reservation[];
+    expect(
+      reservations.find((candidate) => candidate.reservationId === reservationId),
+    ).toMatchObject({ workerId: 'WKR-011', status: 'active', fulfilledByMovementId: null });
+  });
+
+  it('treats an explicit null identifier as a malformed field, not a missing worker', async () => {
+    const originalId = await returnDrill(instant(0, '11:00'));
+    const response = await store.http
+      .post(`/movements/${originalId}/corrections`)
+      .set('idempotency-key', 'dddddddd-eeee-ffff-0000-111111111111')
+      .send({ kind: 'amend', reason: 'probe', keeperId: 'KPR-01', returnedByWorkerId: null });
+    expectApiError(response, 400, 'validation_failed');
+  });
+
+  it('answers a malformed instant with the same status wherever it is caught', async () => {
+    const originalId = await returnDrill(instant(0, '11:00'));
+    const response = await store.http
+      .post(`/movements/${originalId}/corrections`)
+      .set('idempotency-key', 'eeeeeeee-ffff-0000-1111-222222222222')
+      .send({ kind: 'amend', reason: 'probe', keeperId: 'KPR-01', effectiveAt: null });
+    expectApiError(response, 400, 'validation_failed');
+  });
+
   it('refuses a correction without a reason', async () => {
     const originalId = await returnDrill(instant(0, '11:00'));
     const response = await store.http

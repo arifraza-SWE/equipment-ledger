@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { MOVEMENT_TYPES, type MovementType } from '@equipment-ledger/shared';
-import { type HydratedDocument, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({ collection: 'movements', versionKey: false })
 export class MovementRecord {
@@ -44,9 +44,13 @@ export class MovementRecord {
 
   @Prop({ type: Types.ObjectId, default: null })
   createdByCorrectionId: Types.ObjectId | null;
-}
 
-export type MovementDocument = HydratedDocument<MovementRecord>;
+  @Prop({ type: Types.ObjectId, default: null })
+  pairedWithMovementId: Types.ObjectId | null;
+
+  @Prop({ type: [Types.ObjectId], default: [] })
+  voidedReservationIds: Types.ObjectId[];
+}
 
 export const MovementSchema = SchemaFactory.createForClass(MovementRecord);
 

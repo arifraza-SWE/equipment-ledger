@@ -52,16 +52,17 @@ export class ChangeServiceStatusUseCase {
       const timeline = (await this.movements.findEffectiveTimeline(asset._id, session)).map(
         toTimelineEntry,
       );
+      const movementType =
+        request.status === 'out_of_service' ? 'out_of_service' : 'back_in_service';
       assertEntryCanBeAppended({
         timeline,
+        type: movementType,
         effectiveAt,
         assetId: asset._id,
         registeredAt: asset.registeredAt,
         now,
       });
 
-      const movementType =
-        request.status === 'out_of_service' ? 'out_of_service' : 'back_in_service';
       const candidate: TimelineEntry = {
         movementId: PENDING_ENTRY_ID,
         type: movementType,

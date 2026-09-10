@@ -14,7 +14,7 @@ import {
 import { type ReservationRecord } from '../modules/ledger/persistence/reservation.schema';
 import { ReservationsRepository } from '../modules/ledger/persistence/reservations.repository';
 import { WorkersRepository } from '../modules/workers/workers.repository';
-import { seedClock, type SeedClock } from './anchor';
+import { seedClock } from './anchor';
 import { buildAssetCatalogue, KEEPERS, WORKERS, workerCertificationDates } from './catalogue';
 import { deterministicObjectId } from './deterministic-id';
 import { buildRoutineLoans } from './routine-loans';
@@ -32,9 +32,6 @@ export interface SeedSummary {
 
 const RECORDED_LAG_MINUTES = 3;
 const REGISTRATION_DAY_OFFSET = -45;
-
-type SeedMovement = Omit<MovementRecord, 'sequence'> & { sequence: number };
-type SeedReservationRecord = ReservationRecord;
 
 /**
  * Replaces the whole store with the fixed dataset. Every document id is derived from a label,
@@ -57,7 +54,7 @@ export async function seedStore(
   const catalogue = buildAssetCatalogue();
   const scenarios = buildScenarios(clock);
   const loans = [...scenarios.loans, ...buildRoutineLoans(clock)];
-  const reservationRecords = compileReservations(scenarios, clock);
+  const reservationRecords = compileReservations(scenarios);
   const { movementRecords, correctionRecords } = compileLedger(loans, scenarios);
   const registeredAt = clock.at(REGISTRATION_DAY_OFFSET, '08:00');
 
@@ -110,7 +107,7 @@ export async function seedStore(
   };
 }
 
-function compileReservations(scenarios: SeedScenarios, clock: SeedClock): SeedReservationRecord[] {
+function compileReservations(scenarios: SeedScenarios): ReservationRecord[] {
   return scenarios.reservations.map((reservation) => {
     const base = {
       _id: deterministicObjectId(`reservation:${reservation.label}`),
@@ -132,20 +129,19 @@ function compileReservations(scenarios: SeedScenarios, clock: SeedClock): SeedRe
           closedReason: null,
         };
       case 'fulfilled': {
-        const loanLabel = scenarios.loans.find(
+        const fulfillingLoan = scenarios.loans.find(
           (loan) => loan.reservationLabel === reservation.label,
-        )?.label;
-        if (!loanLabel) {
+        );
+        if (!fulfillingLoan) {
           throw new Error(
             `Seed reservation "${reservation.label}" is fulfilled but no loan references it`,
           );
         }
-        const fulfillingLoan = scenarios.loans.find((loan) => loan.label === loanLabel);
         return {
           ...base,
           status: 'fulfilled' as const,
-          fulfilledByMovementId: movementId(loanLabel, 'issue'),
-          closedAt: fulfillingLoan ? recordedAfter(fulfillingLoan.issuedAt) : clock.anchor,
+          fulfilledByMovementId: movementId(fulfillingLoan.label, 'issue'),
+          closedAt: recordedAfter(fulfillingLoan.issuedAt),
           closedReason: 'collected',
         };
       }
@@ -176,7 +172,7 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       deterministicObjectId(`reservation:${reservation.label}`),
     ]),
   );
-  const movementRecords: SeedMovement[] = [];
+  const movementRecords: MovementRecord[] = [];
 
   for (const loan of loans) {
     movementRecords.push({
@@ -196,6 +192,8 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       sequence: 0,
       supersededByCorrectionId: null,
       createdByCorrectionId: null,
+      pairedWithMovementId: null,
+      voidedReservationIds: [],
     });
     if (loan.returnedAt) {
       movementRecords.push({
@@ -213,6 +211,8 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
         sequence: 0,
         supersededByCorrectionId: null,
         createdByCorrectionId: null,
+        pairedWithMovementId: null,
+        voidedReservationIds: [],
       });
       if (loan.withdrawnOnReturn) {
         movementRecords.push({
@@ -230,6 +230,8 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
           sequence: 0,
           supersededByCorrectionId: null,
           createdByCorrectionId: null,
+          pairedWithMovementId: null,
+          voidedReservationIds: [],
         });
       }
     }
@@ -251,6 +253,8 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       sequence: 0,
       supersededByCorrectionId: null,
       createdByCorrectionId: null,
+      pairedWithMovementId: null,
+      voidedReservationIds: [],
     });
   }
 
@@ -265,7 +269,7 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
       );
     }
     const correctionId = deterministicObjectId(`correction:${correction.label}`);
-    const replacement: SeedMovement = {
+    const replacement: MovementRecord = {
       ...original,
       _id: deterministicObjectId(`movement:${correction.label}:replacement`),
       effectiveAt: correction.newEffectiveAt,
@@ -297,8 +301,8 @@ function compileLedger(loans: SeedLoan[], scenarios: SeedScenarios) {
   return { movementRecords, correctionRecords };
 }
 
-function assignSequences(movementRecords: SeedMovement[]): void {
-  const byAsset = new Map<string, SeedMovement[]>();
+function assignSequences(movementRecords: MovementRecord[]): void {
+  const byAsset = new Map<string, MovementRecord[]>();
   for (const record of movementRecords) {
     const forAsset = byAsset.get(record.assetId) ?? [];
     forAsset.push(record);
@@ -317,13 +321,13 @@ function assignSequences(movementRecords: SeedMovement[]): void {
   }
 }
 
-function typeOrder(record: SeedMovement): number {
+function typeOrder(record: MovementRecord): number {
   return record.type === 'return' ? 0 : record.type === 'out_of_service' ? 1 : 2;
 }
 
 function countWritesPerAsset(
-  movementRecords: SeedMovement[],
-  reservationRecords: SeedReservationRecord[],
+  movementRecords: MovementRecord[],
+  reservationRecords: ReservationRecord[],
 ): Map<string, number> {
   const counts = new Map<string, number>();
   for (const record of [...movementRecords, ...reservationRecords]) {
@@ -332,9 +336,9 @@ function countWritesPerAsset(
   return counts;
 }
 
-function assertConsistent(movementRecords: SeedMovement[], assetIds: string[]): void {
+function assertConsistent(movementRecords: MovementRecord[], assetIds: string[]): void {
   const known = new Set(assetIds);
-  const byAsset = new Map<string, SeedMovement[]>();
+  const byAsset = new Map<string, MovementRecord[]>();
   for (const record of movementRecords) {
     if (!known.has(record.assetId)) {
       throw new Error(`Seed movement references unknown asset ${record.assetId}`);

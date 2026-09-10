@@ -58,25 +58,31 @@ export class IdempotencyInterceptor implements NestInterceptor {
       mergeMap(async (body: unknown) => {
         await this.idempotency.complete(
           idempotencyKey,
+          claim.claimToken,
           { statusCode: successStatusCode, body },
           this.clock.now(),
         );
         return body;
       }),
-      catchError((error: unknown) => this.recordFailure(idempotencyKey, error)),
+      catchError((error: unknown) => this.recordFailure(idempotencyKey, claim.claimToken, error)),
     );
   }
 
-  private async recordFailure(idempotencyKey: string, error: unknown): Promise<never> {
+  private async recordFailure(
+    idempotencyKey: string,
+    claimToken: string,
+    error: unknown,
+  ): Promise<never> {
     const apiError = toApiError(error);
     if (apiError.statusCode < 500) {
       await this.idempotency.complete(
         idempotencyKey,
+        claimToken,
         { statusCode: apiError.statusCode, body: apiError },
         this.clock.now(),
       );
     } else {
-      await this.idempotency.release(idempotencyKey);
+      await this.idempotency.release(idempotencyKey, claimToken);
     }
     throw error;
   }

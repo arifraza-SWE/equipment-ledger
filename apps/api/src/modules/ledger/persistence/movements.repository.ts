@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Movement, MovementType } from '@equipment-ledger/shared';
 import { type ClientSession, type FilterQuery, Model, Types } from 'mongoose';
-import { StateConflictError } from '../../../common/errors/domain-error';
+import { InvalidRequestError, StateConflictError } from '../../../common/errors/domain-error';
 import { HOLDING_MOVEMENT_TYPES, type TimelineEntry } from '../domain/asset-timeline';
 import { MovementRecord } from './movement.schema';
 
@@ -19,6 +19,8 @@ export interface NewMovement {
   note: string | null;
   sequence: number;
   createdByCorrectionId: Types.ObjectId | null;
+  pairedWithMovementId?: Types.ObjectId | null;
+  voidedReservationIds?: Types.ObjectId[];
 }
 
 export interface LatestEntriesForAsset {
@@ -53,7 +55,14 @@ export class MovementsRepository {
 
   async insert(newMovement: NewMovement, session: ClientSession): Promise<MovementRecord> {
     const [created] = await this.movements.create(
-      [{ ...newMovement, supersededByCorrectionId: null }],
+      [
+        {
+          ...newMovement,
+          pairedWithMovementId: newMovement.pairedWithMovementId ?? null,
+          voidedReservationIds: newMovement.voidedReservationIds ?? [],
+          supersededByCorrectionId: null,
+        },
+      ],
       { session },
     );
     if (!created) {
@@ -69,12 +78,14 @@ export class MovementsRepository {
       .lean();
   }
 
-  async findByIds(movementIds: readonly Types.ObjectId[]): Promise<Map<string, MovementRecord>> {
-    if (movementIds.length === 0) {
-      return new Map();
-    }
-    const records = await this.movements.find({ _id: { $in: movementIds } }).lean();
-    return new Map(records.map((record) => [record._id.toHexString(), record]));
+  async findPairedWith(
+    movementId: Types.ObjectId,
+    session: ClientSession,
+  ): Promise<MovementRecord | null> {
+    return this.movements
+      .findOne({ pairedWithMovementId: movementId, supersededByCorrectionId: null })
+      .session(session)
+      .lean();
   }
 
   async findEffectiveTimeline(assetId: string, session?: ClientSession): Promise<MovementRecord[]> {
@@ -250,12 +261,13 @@ function decodeCursor(
   }
   const [recordedAtPart, movementIdPart] = cursor.split('_');
   const recordedAtMillis = Number(recordedAtPart);
-  if (
-    !Number.isFinite(recordedAtMillis) ||
-    !movementIdPart ||
-    !Types.ObjectId.isValid(movementIdPart)
-  ) {
-    return null;
+  const withinRange =
+    Number.isSafeInteger(recordedAtMillis) && Math.abs(recordedAtMillis) <= 8.64e15;
+  if (!withinRange || !movementIdPart || !Types.ObjectId.isValid(movementIdPart)) {
+    throw new InvalidRequestError(
+      'validation_failed',
+      'That page cursor is not one this ledger issued. Ask for the first page again.',
+    );
   }
   return { recordedAt: new Date(recordedAtMillis), movementId: new Types.ObjectId(movementIdPart) };
 }

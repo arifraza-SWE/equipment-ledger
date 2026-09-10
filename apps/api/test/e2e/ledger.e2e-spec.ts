@@ -1,4 +1,9 @@
-import type { AssetSnapshot, MovementResult, StoreSnapshot } from '@equipment-ledger/shared';
+import type {
+  ApiError,
+  AssetSnapshot,
+  MovementResult,
+  StoreSnapshot,
+} from '@equipment-ledger/shared';
 import {
   assetNow,
   correctMovement,
@@ -161,6 +166,37 @@ describe('the store as of an instant', () => {
   it('rejects a malformed instant', async () => {
     const response = await storeAsOf(store, 'last tuesday');
     expect(response.status).toBe(400);
+  });
+
+  it('rejects a tampered page cursor instead of falling over', async () => {
+    for (const cursor of [
+      '8640000000000001_507f1f77bcf86cd799439011',
+      '99999999999999999999_507f1f77bcf86cd799439011',
+      'nonsense',
+      '1757_notanobjectid',
+    ]) {
+      const response = await store.http.get('/ledger/movements').query({ cursor });
+      expect({ cursor, status: response.status, code: (response.body as ApiError).code }).toEqual({
+        cursor,
+        status: 400,
+        code: 'validation_failed',
+      });
+    }
+  });
+
+  it('refuses an oversized body with a readable answer rather than a server fault', async () => {
+    const response = await store.http
+      .post('/movements/issues')
+      .set('idempotency-key', 'cccccccc-dddd-eeee-ffff-000000000000')
+      .send({
+        assetId: 'DRL-003',
+        workerId: 'WKR-001',
+        keeperId: 'KPR-01',
+        effectiveAt: instant(0, '07:40'),
+        note: 'x'.repeat(110_000),
+      });
+    expect(response.status).toBe(413);
+    expect((response.body as ApiError).message).toContain('500 characters');
   });
 
   it('keeps the seed anchor where the tests expect it', () => {

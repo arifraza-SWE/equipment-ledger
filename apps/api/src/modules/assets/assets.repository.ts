@@ -18,10 +18,6 @@ export interface NewAsset {
 export class AssetsRepository {
   constructor(@InjectModel(AssetRecord.name) private readonly assets: Model<AssetRecord>) {}
 
-  async findAll(): Promise<AssetRecord[]> {
-    return this.assets.find().sort({ _id: 1 }).lean();
-  }
-
   async findRegisteredBy(instant: Date): Promise<AssetRecord[]> {
     return this.assets
       .find({ registeredAt: { $lte: instant } })

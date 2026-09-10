@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Reservation } from '@equipment-ledger/shared';
-import type { ClientSession } from 'mongoose';
+import { type ClientSession, Types } from 'mongoose';
 import { AssetsRepository } from '../assets/assets.repository';
 import { type MovementRecord } from '../ledger/persistence/movement.schema';
 import { MovementsRepository } from '../ledger/persistence/movements.repository';
@@ -16,6 +16,7 @@ export interface ServiceWithdrawal {
   reason: string;
   now: Date;
   expectedVersion: number;
+  pairedWithMovementId?: Types.ObjectId | null;
 }
 
 export interface ServiceWithdrawalOutcome {
@@ -48,6 +49,37 @@ export class ServiceWithdrawalRecorder {
       withdrawal.expectedVersion,
       session,
     );
+    const standing = await this.reservations.findActiveEndingAfter(
+      withdrawal.assetId,
+      withdrawal.now,
+      session,
+    );
+    const voided: Reservation[] = [];
+    const voidedReservationIds: Types.ObjectId[] = [];
+    for (const reservation of standing) {
+      const closed = await this.reservations.close(
+        reservation._id,
+        'voided',
+        withdrawal.now,
+        OUT_OF_SERVICE_VOID_REASON,
+        session,
+      );
+      if (closed) {
+        voidedReservationIds.push(reservation._id);
+        voided.push(
+          toReservation(
+            {
+              ...reservation,
+              status: 'voided',
+              closedAt: withdrawal.now,
+              closedReason: OUT_OF_SERVICE_VOID_REASON,
+            },
+            withdrawal.now,
+          ),
+        );
+      }
+    }
+
     const movement = await this.movements.insert(
       {
         assetId: withdrawal.assetId,
@@ -62,38 +94,11 @@ export class ServiceWithdrawalRecorder {
         note: withdrawal.reason,
         sequence,
         createdByCorrectionId: null,
+        pairedWithMovementId: withdrawal.pairedWithMovementId ?? null,
+        voidedReservationIds,
       },
       session,
     );
-
-    const standing = await this.reservations.findActiveEndingAfter(
-      withdrawal.assetId,
-      withdrawal.now,
-      session,
-    );
-    const voided: Reservation[] = [];
-    for (const reservation of standing) {
-      const closed = await this.reservations.close(
-        reservation._id,
-        'voided',
-        withdrawal.now,
-        OUT_OF_SERVICE_VOID_REASON,
-        session,
-      );
-      if (closed) {
-        voided.push(
-          toReservation(
-            {
-              ...reservation,
-              status: 'voided',
-              closedAt: withdrawal.now,
-              closedReason: OUT_OF_SERVICE_VOID_REASON,
-            },
-            withdrawal.now,
-          ),
-        );
-      }
-    }
 
     return { movement, voidedReservations: voided };
   }

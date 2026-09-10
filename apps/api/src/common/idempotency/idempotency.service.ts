@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { randomUUID } from 'node:crypto';
 import { RuleViolationError, StateConflictError } from '../errors/domain-error';
 import { IdempotencyRecord, type StoredResponse } from './idempotency-record.schema';
 
@@ -13,7 +14,8 @@ import { IdempotencyRecord, type StoredResponse } from './idempotency-record.sch
 export const STALE_CLAIM_AFTER_MS = 120_000;
 const DUPLICATE_KEY_ERROR = 11000;
 
-export type ClaimOutcome = { kind: 'owned' } | { kind: 'replay'; response: StoredResponse };
+export type ClaimOutcome =
+  { kind: 'owned'; claimToken: string } | { kind: 'replay'; response: StoredResponse };
 
 @Injectable()
 export class IdempotencyService {
@@ -28,16 +30,18 @@ export class IdempotencyService {
     requestFingerprint: string,
     now: Date,
   ): Promise<ClaimOutcome> {
+    const claimToken = randomUUID();
     try {
       await this.records.create({
         _id: idempotencyKey,
         requestFingerprint,
         status: 'in_progress',
         response: null,
+        claimToken,
         claimedAt: now,
         completedAt: null,
       });
-      return { kind: 'owned' };
+      return { kind: 'owned', claimToken };
     } catch (error) {
       if (!isDuplicateKeyError(error)) {
         throw error;
@@ -46,15 +50,30 @@ export class IdempotencyService {
     return this.resolveExistingClaim(idempotencyKey, requestFingerprint, now);
   }
 
-  async complete(idempotencyKey: string, response: StoredResponse, now: Date): Promise<void> {
-    await this.records.updateOne(
-      { _id: idempotencyKey },
+  /**
+   * Only the request that still holds the claim may write its answer. Without the token a slow
+   * first attempt could overwrite the answer of the retry that took the claim over, and every
+   * later replay would then be told the wrong thing.
+   */
+  async complete(
+    idempotencyKey: string,
+    claimToken: string,
+    response: StoredResponse,
+    now: Date,
+  ): Promise<void> {
+    const outcome = await this.records.updateOne(
+      { _id: idempotencyKey, claimToken },
       { $set: { status: 'completed', response, completedAt: now } },
     );
+    if (outcome.matchedCount === 0) {
+      this.logger.warn(
+        `Idempotency-Key ${idempotencyKey} was taken over by another request; not overwriting its answer.`,
+      );
+    }
   }
 
-  async release(idempotencyKey: string): Promise<void> {
-    await this.records.deleteOne({ _id: idempotencyKey, status: 'in_progress' });
+  async release(idempotencyKey: string, claimToken: string): Promise<void> {
+    await this.records.deleteOne({ _id: idempotencyKey, claimToken, status: 'in_progress' });
   }
 
   private async resolveExistingClaim(
@@ -77,17 +96,18 @@ export class IdempotencyService {
       this.logger.log(`Replaying stored response for Idempotency-Key ${idempotencyKey}`);
       return { kind: 'replay', response: existing.response };
     }
+    const claimToken = randomUUID();
     const takenOver = await this.records.findOneAndUpdate(
       {
         _id: idempotencyKey,
         status: 'in_progress',
         claimedAt: { $lt: new Date(now.getTime() - STALE_CLAIM_AFTER_MS) },
       },
-      { $set: { claimedAt: now } },
+      { $set: { claimedAt: now, claimToken } },
     );
     if (takenOver) {
       this.logger.warn(`Taking over stale in-progress Idempotency-Key ${idempotencyKey}`);
-      return { kind: 'owned' };
+      return { kind: 'owned', claimToken };
     }
     throw new StateConflictError(
       'idempotency_in_progress',

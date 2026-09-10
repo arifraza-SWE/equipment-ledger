@@ -4,7 +4,7 @@ import {
   type CorrectionResult,
   type CorrectMovementRequest,
 } from '@equipment-ledger/shared';
-import type { ClientSession } from 'mongoose';
+import { type ClientSession, Types } from 'mongoose';
 import {
   NotFoundError,
   RuleViolationError,
@@ -136,6 +136,15 @@ export class CorrectMovementUseCase {
       }
       await this.movements.markSuperseded(original._id, correction._id, session);
       await this.settleReservationLink(original, replacement, session);
+      await this.carryPairedWithdrawal(
+        original,
+        replacement,
+        correction._id,
+        request,
+        now,
+        session,
+      );
+      await this.restoreReservationsVoidedBy(original, replacement, session);
 
       return {
         correction: { ...correction, replacementMovementId: replacement ? replacement._id : null },
@@ -153,9 +162,103 @@ export class CorrectMovementUseCase {
   }
 
   /**
+   * The issue path refuses to hand an asset to anyone but the worker who reserved it during
+   * their window. A correction that rewrites the worker or the instant has to answer to the
+   * same rule, or it becomes a way around it.
+   */
+  /**
+   * A damaged return writes the return and the withdrawal together, at one instant. Correcting
+   * the return has to take its withdrawal with it, or the ledger ends up saying the asset was
+   * condemned while somebody was still holding it.
+   */
+  private async carryPairedWithdrawal(
+    original: MovementRecord,
+    replacement: MovementRecord | null,
+    correctionId: Types.ObjectId,
+    request: CorrectMovementRequest,
+    now: Date,
+    session: ClientSession,
+  ): Promise<void> {
+    if (original.type !== 'return') {
+      return;
+    }
+    const paired = await this.movements.findPairedWith(original._id, session);
+    if (!paired) {
+      return;
+    }
+    const pairedCorrection = await this.corrections.insert(
+      {
+        assetId: paired.assetId,
+        originalMovementId: paired._id,
+        kind: request.kind,
+        reason: `${request.reason} (carried from the return it was recorded with)`,
+        keeperId: request.keeperId,
+        recordedAt: now,
+        changes: replacement
+          ? [
+              {
+                field: 'effectiveAt' as const,
+                from: paired.effectiveAt.toISOString(),
+                to: replacement.effectiveAt.toISOString(),
+              },
+            ]
+          : [],
+      },
+      session,
+    );
+    if (replacement) {
+      const movedWithdrawal = await this.movements.insert(
+        {
+          assetId: paired.assetId,
+          type: paired.type,
+          workerId: null,
+          returnedByWorkerId: null,
+          keeperId: paired.keeperId,
+          effectiveAt: replacement.effectiveAt,
+          recordedAt: now,
+          dueAt: null,
+          reservationId: null,
+          note: paired.note,
+          sequence: paired.sequence,
+          createdByCorrectionId: pairedCorrection._id,
+          pairedWithMovementId: replacement._id,
+          voidedReservationIds: paired.voidedReservationIds,
+        },
+        session,
+      );
+      await this.corrections.attachReplacement(pairedCorrection._id, movedWithdrawal._id, session);
+    } else {
+      await this.reopenVoided(paired, session);
+    }
+    await this.movements.markSuperseded(paired._id, pairedCorrection._id, session);
+  }
+
+  /** Voiding a withdrawal means it never happened, so the claims it cancelled stand again. */
+  private async restoreReservationsVoidedBy(
+    original: MovementRecord,
+    replacement: MovementRecord | null,
+    session: ClientSession,
+  ): Promise<void> {
+    if (original.type === 'out_of_service' && !replacement) {
+      await this.reopenVoided(original, session);
+    }
+  }
+
+  private async reopenVoided(withdrawal: MovementRecord, session: ClientSession): Promise<void> {
+    for (const reservationId of withdrawal.voidedReservationIds) {
+      await this.reservations.reinstate(reservationId, session);
+    }
+  }
+
+  /**
    * A reservation records which movement collected it. When a correction supersedes that
    * movement the link must move to the replacement, and when the correction hands the asset to
    * a different worker the reservation was never collected at all, so it goes back to standing.
+   *
+   * Note that a correction is not held to the reservation rule the issue path enforces. That
+   * rule governs what the keeper may hand over at the hatch; a correction only records what
+   * already happened, and a ledger that refuses to record the truth is worse than one that
+   * shows a promise was not kept.
    */
   private async settleReservationLink(
     original: MovementRecord,

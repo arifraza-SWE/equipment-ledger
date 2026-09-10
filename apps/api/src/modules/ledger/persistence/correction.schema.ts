@@ -5,7 +5,7 @@ import {
   type CorrectableField,
   type CorrectionKind,
 } from '@equipment-ledger/shared';
-import { type HydratedDocument, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({ _id: false })
 export class CorrectionChangeRecord {
@@ -49,8 +49,6 @@ export class CorrectionRecord {
   @Prop({ type: [CorrectionChangeSchema], default: [] })
   changes: CorrectionChangeRecord[];
 }
-
-export type CorrectionDocument = HydratedDocument<CorrectionRecord>;
 
 export const CorrectionSchema = SchemaFactory.createForClass(CorrectionRecord);
 

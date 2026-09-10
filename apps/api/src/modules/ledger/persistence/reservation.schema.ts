@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { RESERVATION_STATUSES, type ReservationStatus } from '@equipment-ledger/shared';
-import { type HydratedDocument, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Schema({ collection: 'reservations', versionKey: false })
 export class ReservationRecord {
@@ -39,8 +39,6 @@ export class ReservationRecord {
   @Prop({ type: String, default: null })
   closedReason: string | null;
 }
-
-export type ReservationDocument = HydratedDocument<ReservationRecord>;
 
 export const ReservationSchema = SchemaFactory.createForClass(ReservationRecord);
 

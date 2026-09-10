@@ -1,11 +1,16 @@
-import { ISSUE_RULES, MOVEMENT_TYPE_LABELS } from '@equipment-ledger/shared';
+import { ISSUE_RULES, MOVEMENT_TYPE_LABELS, type MovementType } from '@equipment-ledger/shared';
 import {
   type DomainError,
   RuleViolationError,
   StateConflictError,
 } from '../../common/errors/domain-error';
 import { minutes } from '../../common/time/instant';
-import type { TimelineEntry, TimelineViolation } from '../ledger/domain/asset-timeline';
+import {
+  lastEntryOnTrack,
+  type TimelineEntry,
+  type TimelineViolation,
+  trackOf,
+} from '../ledger/domain/asset-timeline';
 import { describeInstant } from '../../config/site-time';
 
 export interface TimelineNames {
@@ -15,12 +20,13 @@ export interface TimelineNames {
 
 export function assertEntryCanBeAppended(input: {
   timeline: readonly TimelineEntry[];
+  type: MovementType;
   effectiveAt: Date;
   assetId: string;
   registeredAt: Date;
   now: Date;
 }): void {
-  const { timeline, effectiveAt, assetId, registeredAt, now } = input;
+  const { timeline, type, effectiveAt, assetId, registeredAt, now } = input;
   assertNotInFuture(effectiveAt, now);
   if (effectiveAt < registeredAt) {
     throw new RuleViolationError(
@@ -29,7 +35,7 @@ export function assertEntryCanBeAppended(input: {
       { assetId, registeredAt: registeredAt.toISOString() },
     );
   }
-  const latest = timeline[timeline.length - 1];
+  const latest = lastEntryOnTrack(timeline, trackOf(type));
   if (latest && latest.effectiveAt > effectiveAt) {
     throw new RuleViolationError(
       'timeline_conflict',
@@ -109,4 +115,5 @@ export function timelineViolationToError(
 }
 
 export const PENDING_ENTRY_ID = 'pending';
+export const PENDING_WITHDRAWAL_ID = 'pending-withdrawal';
 export const PENDING_ENTRY_SEQUENCE = Number.MAX_SAFE_INTEGER;

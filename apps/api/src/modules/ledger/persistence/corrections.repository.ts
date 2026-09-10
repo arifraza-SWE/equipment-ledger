@@ -45,10 +45,6 @@ export class CorrectionsRepository {
     );
   }
 
-  async findById(correctionId: string): Promise<CorrectionRecord | null> {
-    return this.corrections.findById(correctionId).lean();
-  }
-
   async findForAsset(assetId: string): Promise<CorrectionRecord[]> {
     return this.corrections.find({ assetId }).sort({ recordedAt: 1 }).lean();
   }

@@ -1,11 +1,4 @@
-import {
-  describeInstantOn,
-  endOfDayOn,
-  formatDayOn,
-  instantFromWallClock,
-  isoDateOn,
-  type WallClock,
-} from '@equipment-ledger/shared';
+import { describeInstantOn, endOfDayOn, formatDayOn, isoDateOn } from '@equipment-ledger/shared';
 
 const DEFAULT_SITE_TIMEZONE = 'UTC';
 
@@ -32,8 +25,4 @@ export function isoDate(instant: Date): string {
 
 export function endOfSiteDay(instant: Date): Date {
   return endOfDayOn(instant, siteTimeZone());
-}
-
-export function instantOnSiteClock(wallClock: WallClock): Date {
-  return instantFromWallClock(wallClock, siteTimeZone());
 }

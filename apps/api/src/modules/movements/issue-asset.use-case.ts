@@ -66,6 +66,7 @@ export class IssueAssetUseCase {
       );
       assertEntryCanBeAppended({
         timeline,
+        type: 'issue',
         effectiveAt,
         assetId: asset._id,
         registeredAt: asset.registeredAt,

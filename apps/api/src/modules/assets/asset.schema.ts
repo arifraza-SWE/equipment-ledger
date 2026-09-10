@@ -5,7 +5,6 @@ import {
   CERTIFICATION_TYPES,
   type CertificationType,
 } from '@equipment-ledger/shared';
-import type { HydratedDocument } from 'mongoose';
 
 @Schema({ collection: 'assets', versionKey: false })
 export class AssetRecord {
@@ -27,7 +26,5 @@ export class AssetRecord {
   @Prop({ type: Number, required: true, default: 0 })
   version: number;
 }
-
-export type AssetDocument = HydratedDocument<AssetRecord>;
 
 export const AssetSchema = SchemaFactory.createForClass(AssetRecord);

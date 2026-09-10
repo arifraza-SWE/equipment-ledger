@@ -3,7 +3,7 @@ import {
   type CorrectionKind,
   type CorrectMovementRequest,
 } from '@equipment-ledger/shared';
-import { IsIn, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, Length, MaxLength, ValidateIf } from 'class-validator';
 import { IsIdentifier } from '../../../common/validation/identifier';
 import { IsInstant } from '../../../common/validation/is-instant.decorator';
 
@@ -22,11 +22,11 @@ export class CorrectMovementDto implements CorrectMovementRequest {
   @IsInstant()
   effectiveAt?: string;
 
-  @IsOptional()
+  @ValidateIf((_dto, value) => value !== undefined)
   @IsIdentifier('workerId')
   workerId?: string;
 
-  @IsOptional()
+  @ValidateIf((_dto, value) => value !== undefined)
   @IsIdentifier('returnedByWorkerId')
   returnedByWorkerId?: string;
 

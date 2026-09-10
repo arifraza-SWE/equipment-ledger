@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { CERTIFICATION_TYPES, type CertificationType } from '@equipment-ledger/shared';
-import type { HydratedDocument } from 'mongoose';
 
 @Schema({ _id: false })
 export class CertificationRecord {
@@ -33,7 +32,5 @@ export class WorkerRecord {
   @Prop({ type: Date, required: true })
   registeredAt: Date;
 }
-
-export type WorkerDocument = HydratedDocument<WorkerRecord>;
 
 export const WorkerSchema = SchemaFactory.createForClass(WorkerRecord);

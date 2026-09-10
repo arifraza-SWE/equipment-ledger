@@ -23,6 +23,7 @@ import {
   assertEntryCanBeAppended,
   PENDING_ENTRY_ID,
   PENDING_ENTRY_SEQUENCE,
+  PENDING_WITHDRAWAL_ID,
   timelineViolationToError,
 } from './timeline-conflicts';
 
@@ -54,6 +55,7 @@ export class ReturnAssetUseCase {
       );
       assertEntryCanBeAppended({
         timeline,
+        type: 'return',
         effectiveAt,
         assetId: asset._id,
         registeredAt: asset.registeredAt,
@@ -75,12 +77,34 @@ export class ReturnAssetUseCase {
         dueAt: null,
         reservationId: null,
       };
-      const violation = findTimelineViolation(sortTimeline([...timeline, candidate]));
+      const withdrawalCandidate: TimelineEntry | null = request.takeOutOfService
+        ? {
+            movementId: PENDING_WITHDRAWAL_ID,
+            type: 'out_of_service',
+            effectiveAt,
+            sequence: PENDING_ENTRY_SEQUENCE + 1,
+            workerId: null,
+            dueAt: null,
+            reservationId: null,
+          }
+        : null;
+      const proposed = withdrawalCandidate ? [candidate, withdrawalCandidate] : [candidate];
+      const violation = findTimelineViolation(sortTimeline([...timeline, ...proposed]));
       if (violation || !holding) {
         throw timelineViolationToError(
           violation ?? { kind: 'return_without_issue', entry: candidate, previousReturn: null },
           { assetId: asset._id, workerName },
         );
+      }
+      if (withdrawalCandidate) {
+        assertEntryCanBeAppended({
+          timeline,
+          type: 'out_of_service',
+          effectiveAt,
+          assetId: asset._id,
+          registeredAt: asset.registeredAt,
+          now,
+        });
       }
 
       if (holding.workerId !== returner._id && !request.acknowledgeDifferentReturner) {
@@ -125,6 +149,7 @@ export class ReturnAssetUseCase {
           reason: request.note ?? RETURNED_DAMAGED_REASON,
           now,
           expectedVersion: sequence,
+          pairedWithMovementId: returnMovement._id,
         },
         session,
       );
