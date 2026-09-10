@@ -59,7 +59,7 @@ Everything lives in one `.env` at the repository root; `.env.example` documents 
 | `SITE_TIMEZONE` | API | The clock the site keeps. Used for every date and time the API puts in a message. |
 | `NEXT_PUBLIC_SITE_TIMEZONE` | web | The same zone for the screens. Keep the two identical. |
 | `API_PORT` | API | Defaults to 4000. |
-| `WEB_ORIGIN` | API | The origin allowed by CORS, normally `http://localhost:3000`. |
+| `WEB_ORIGIN` | API | Origins allowed by CORS, comma separated. Normally `http://localhost:3000`. |
 | `NEXT_PUBLIC_API_URL` | web | Where the browser and the Next.js server reach the API. |
 | `SEED_ANCHOR_DATE` | seed | Optional `YYYY-MM-DD`. Pins the seed's "today". |
 

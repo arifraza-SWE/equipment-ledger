@@ -14,7 +14,7 @@ for i in $(seq 1 "$count"); do
   worker="${workers[$(( (i - 1) % ${#workers[@]} ))]}"
   key="$(uuidgen | tr '[:upper:]' '[:lower:]')"
   (
-    curl -s -o "$outdir/$i.json" -w '%{http_code}' \
+    curl -s -o "$outdir/$i.json" -w '%{http_code}\n' \
       -X POST "$api_url/movements/issues" \
       -H 'content-type: application/json' \
       -H "idempotency-key: $key" \
@@ -25,11 +25,11 @@ done
 wait
 
 echo "$count simultaneous issues of $asset_id at $effective_at"
-cat "$outdir"/*.code | sort | uniq -c | awk '{printf "  %s x HTTP %s\n", $1, $2}'
+cat "$outdir"/*.code | sort | uniq -c | awk '{printf "  %s answered HTTP %s\n", $1, $2}'
 echo
 echo "one of the refusals:"
 grep -l '"asset_already_issued"' "$outdir"/*.json | head -1 | xargs -I{} sh -c "python3 -c \"import json,sys; print('  ' + json.load(open('{}'))['message'])\""
 echo
 echo "holder according to the ledger:"
-curl -s "$api_url/assets/$asset_id" | python3 -c 'import json,sys; s=json.load(sys.stdin); h=s["holding"]; print("  " + (h["worker"]["fullName"] + " (" + h["worker"]["workerId"] + ") since " + h["effectiveAt"] if h else "nobody"))'
+curl -s "$api_url/assets/$asset_id" | python3 -c 'import json,sys; s=json.load(sys.stdin); h=s["holding"]; print("  " + (h["worker"]["fullName"] + " (" + h["worker"]["workerId"] + ")" if h else "nobody"))'
 rm -rf "$outdir"
