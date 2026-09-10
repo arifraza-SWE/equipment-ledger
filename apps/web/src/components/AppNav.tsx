@@ -14,11 +14,21 @@ const NAV_ITEMS = [
   { href: '/workers', label: 'Workers' },
 ] as const;
 
-export function AppNav() {
+interface AppNavProps {
+  open: boolean;
+  onNavigate: () => void;
+}
+
+export function AppNav({ open, onNavigate }: AppNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Main" className={styles.nav}>
+    <nav
+      id="main-navigation"
+      aria-label="Main"
+      className={styles.nav}
+      data-open={open ? 'true' : 'false'}
+    >
       {NAV_ITEMS.map((navItem) => {
         const active = navItem.href === '/' ? pathname === '/' : pathname.startsWith(navItem.href);
         return (
@@ -27,6 +37,7 @@ export function AppNav() {
             href={navItem.href}
             className={styles.navLink}
             aria-current={active ? 'page' : undefined}
+            onClick={onNavigate}
           >
             {navItem.label}
           </Link>
